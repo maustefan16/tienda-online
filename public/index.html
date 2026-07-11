@@ -384,6 +384,101 @@
       justify-content: flex-end;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .assistant-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(8, 19, 26, .42);
+      backdrop-filter: blur(8px);
+    }
+
+    .assistant-modal.open {
+      display: flex;
+    }
+
+    .assistant-card {
+      width: min(680px, 100%);
+      background: #fff;
+      border: 1px solid rgba(255, 255, 255, .65);
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(8, 19, 26, .28);
+      overflow: hidden;
+    }
+
+    .assistant-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 18px;
+      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
+      color: #fff;
+    }
+
+    .assistant-head p {
+      color: rgba(255, 255, 255, .76);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .assistant-close {
+      width: 36px;
+      min-height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .14);
+      box-shadow: none;
+    }
+
+    .assistant-body {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .assistant-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .assistant-examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .assistant-chip {
+      min-height: 32px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #edf2f6;
+      color: var(--ink);
+      border: 1px solid #dce6ec;
+      box-shadow: none;
+      font-size: 12px;
+    }
+
+    .assistant-result {
+      min-height: 44px;
+      border: 1px solid #dce6ec;
+      border-radius: 12px;
+      background: #f8fbfc;
+      padding: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
     aside {
       position: sticky;
       top: 18px;
@@ -420,6 +515,10 @@
         grid-template-columns: 1fr;
       }
 
+      .assistant-row {
+        grid-template-columns: 1fr;
+      }
+
       table {
         font-size: 13px;
       }
@@ -436,7 +535,10 @@
       <h1>Mi Tienda</h1>
       <p id="today"></p>
     </div>
-    <button class="secondary" id="resetBtn">Reiniciar datos</button>
+    <div class="header-actions">
+      <button id="assistantBtn" type="button">Asistente</button>
+      <button class="secondary" id="resetBtn">Reiniciar datos</button>
+    </div>
   </header>
 
   <main>
@@ -537,6 +639,31 @@
     </aside>
   </main>
 
+  <div class="assistant-modal" id="assistantModal" aria-hidden="true">
+    <section class="assistant-card" role="dialog" aria-modal="true" aria-labelledby="assistantTitle">
+      <div class="assistant-head">
+        <div>
+          <h2 id="assistantTitle">Asistente de tienda</h2>
+          <p>Escribe una orden corta para agregar, vender, buscar o revisar stock.</p>
+        </div>
+        <button class="assistant-close" id="assistantClose" type="button" aria-label="Cerrar">x</button>
+      </div>
+      <div class="assistant-body">
+        <div class="assistant-row">
+          <input id="assistantCommand" placeholder="Ej. agrega Coca-Cola precio 6.50 stock 12 categoria bebidas">
+          <button id="assistantRun" type="button">Ejecutar</button>
+        </div>
+        <div class="assistant-examples">
+          <button class="assistant-chip" type="button" data-command="agrega Coca-Cola precio 6.50 stock 12 categoria bebidas">Agregar producto</button>
+          <button class="assistant-chip" type="button" data-command="vende 2 Coca-Cola">Vender</button>
+          <button class="assistant-chip" type="button" data-command="stock bajo">Stock bajo</button>
+          <button class="assistant-chip" type="button" data-command="resumen del dia">Resumen</button>
+        </div>
+        <div class="assistant-result" id="assistantResult">Prueba: agrega Inca Kola precio 4.50 stock 8 categoria bebidas</div>
+      </div>
+    </section>
+  </div>
+
   <script>
     const money = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
     const dateFmt = new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' });
@@ -580,7 +707,13 @@
       lowStock: document.querySelector('#lowStock'),
       salesRows: document.querySelector('#salesRows'),
       exportBtn: document.querySelector('#exportBtn'),
-      resetBtn: document.querySelector('#resetBtn')
+      resetBtn: document.querySelector('#resetBtn'),
+      assistantBtn: document.querySelector('#assistantBtn'),
+      assistantModal: document.querySelector('#assistantModal'),
+      assistantClose: document.querySelector('#assistantClose'),
+      assistantCommand: document.querySelector('#assistantCommand'),
+      assistantRun: document.querySelector('#assistantRun'),
+      assistantResult: document.querySelector('#assistantResult')
     };
 
     async function loadState() {
@@ -748,6 +881,172 @@
       render();
     }
 
+    function normalizeText(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function parseMoneyValue(value) {
+      const number = Number(String(value || '').replace(',', '.'));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function findProductByName(name) {
+      const target = normalizeText(name);
+      if (!target) return null;
+      return state.products.find(product => normalizeText(product.name) === target)
+        || state.products.find(product => normalizeText(product.name).includes(target))
+        || state.products.find(product => target.includes(normalizeText(product.name)));
+    }
+
+    function openAssistant() {
+      els.assistantModal.classList.add('open');
+      els.assistantModal.setAttribute('aria-hidden', 'false');
+      els.assistantCommand.focus();
+    }
+
+    function closeAssistant() {
+      els.assistantModal.classList.remove('open');
+      els.assistantModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function setAssistantResult(message, isError = false) {
+      els.assistantResult.textContent = message;
+      els.assistantResult.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+    }
+
+    function extractCommandParts(command) {
+      const priceMatch = command.match(/(?:precio|vale|cuesta|a|s\/)\s*(\d+(?:[.,]\d+)?)/i);
+      const stockMatch = command.match(/(?:stock|cantidad|unidades?|uds?|con)\s*(\d+)/i);
+      const categoryMatch = command.match(/categor(?:ia|ía)\s+(.+)$/i);
+      return {
+        price: priceMatch ? parseMoneyValue(priceMatch[1]) : null,
+        stock: stockMatch ? Number(stockMatch[1]) : null,
+        category: categoryMatch ? categoryMatch[1].trim() : 'General'
+      };
+    }
+
+    function cleanProductName(command) {
+      return command
+        .replace(/^(agrega|agregar|crea|crear|nuevo|nueva)\s*/i, '')
+        .replace(/^producto\s*/i, '')
+        .replace(/(?:precio|vale|cuesta|a|s\/)\s*\d+(?:[.,]\d+)?/ig, '')
+        .replace(/(?:stock|cantidad|unidades?|uds?|con)\s*\d+/ig, '')
+        .replace(/categor(?:ia|ía)\s+.+$/i, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function runAddProduct(command) {
+      const parts = extractCommandParts(command);
+      const name = cleanProductName(command);
+      if (!name || parts.price === null || parts.stock === null) {
+        setAssistantResult('Para agregar usa: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas', true);
+        return;
+      }
+
+      const product = {
+        id: makeId(),
+        name,
+        category: parts.category || 'General',
+        price: parts.price,
+        stock: parts.stock
+      };
+      state.products.push(product);
+      showingEmptyStock = false;
+      render();
+      setAssistantResult(`Listo: agregué ${product.name} con stock ${product.stock} a ${money.format(product.price)}.`);
+    }
+
+    function runSale(command) {
+      const qtyMatch = command.match(/\b(\d+)\b/);
+      const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+      const name = command
+        .replace(/^(vende|vender|venta|registra venta|registrar venta)\s*/i, '')
+        .replace(/\b\d+\b/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const product = findProductByName(name);
+
+      if (!product) {
+        setAssistantResult(`No encontré el producto "${name}". Prueba con: vende 1 arroz`, true);
+        return;
+      }
+
+      if (qty <= 0 || product.stock < qty) {
+        setAssistantResult(`No hay stock suficiente de ${product.name}. Stock actual: ${product.stock}.`, true);
+        return;
+      }
+
+      product.stock -= qty;
+      const saleItem = { id: product.id, name: product.name, qty, price: product.price };
+      const total = saleItem.price * saleItem.qty;
+      state.sales.unshift({ id: makeId(), date: new Date().toISOString(), items: [saleItem], total });
+      cart = cart.filter(item => item.id !== product.id);
+      render();
+      setAssistantResult(`Venta registrada: ${qty} x ${product.name}. Total ${money.format(total)}.`);
+    }
+
+    function runSearch(command) {
+      const term = command.replace(/^(busca|buscar|encuentra|ver)\s*/i, '').trim();
+      els.search.value = term;
+      showingEmptyStock = false;
+      renderProducts();
+      setAssistantResult(term ? `Buscando productos con "${term}".` : 'Escribe: busca arroz');
+    }
+
+    function runLowStock() {
+      const products = state.products.filter(product => product.stock <= 5).sort((a, b) => a.stock - b.stock);
+      if (!products.length) {
+        setAssistantResult('Todo bien: no tienes productos con stock bajo.');
+        return;
+      }
+      setAssistantResult(`Stock bajo: ${products.map(product => `${product.name} (${product.stock})`).join(', ')}.`);
+    }
+
+    function runEmptyStock() {
+      showingEmptyStock = true;
+      renderProducts();
+      const count = state.products.filter(product => product.stock === 0).length;
+      setAssistantResult(count ? `Mostrando ${count} producto(s) sin stock.` : 'No hay productos sin stock.');
+    }
+
+    function runDaySummary() {
+      const today = new Date().toDateString();
+      const sales = state.sales.filter(sale => new Date(sale.date).toDateString() === today);
+      const income = sales.reduce((sum, sale) => sum + sale.total, 0);
+      const units = sales.flatMap(sale => sale.items).reduce((sum, item) => sum + item.qty, 0);
+      setAssistantResult(`Hoy tienes ${sales.length} venta(s), ${units} producto(s) vendidos y ${money.format(income)} en ingresos.`);
+    }
+
+    function runAssistantCommand() {
+      const command = els.assistantCommand.value.trim();
+      const normalized = normalizeText(command);
+      if (!command) {
+        setAssistantResult('Escribe una orden. Ejemplo: vende 2 Coca-Cola', true);
+        return;
+      }
+
+      if (/^(agrega|agregar|crea|crear|nuevo|nueva)\b/.test(normalized)) {
+        runAddProduct(command);
+      } else if (/^(vende|vender|venta|registra venta|registrar venta)\b/.test(normalized)) {
+        runSale(command);
+      } else if (/^(busca|buscar|encuentra|ver)\b/.test(normalized)) {
+        runSearch(command);
+      } else if (normalized.includes('sin stock') || normalized.includes('stock cero')) {
+        runEmptyStock();
+      } else if (normalized.includes('stock bajo') || normalized.includes('bajo stock')) {
+        runLowStock();
+      } else if (normalized.includes('resumen') || normalized.includes('vendido hoy') || normalized.includes('ventas hoy')) {
+        runDaySummary();
+      } else {
+        setAssistantResult('No entendí. Prueba: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas, vende 2 Coca-Cola, stock bajo.', true);
+      }
+    }
+
     els.productForm.addEventListener('submit', event => {
       event.preventDefault();
       const product = {
@@ -808,6 +1107,23 @@
       state = { products: starterProducts.map(p => ({ ...p, id: makeId() })), sales: [] };
       cart = [];
       render();
+    });
+
+    els.assistantBtn.addEventListener('click', openAssistant);
+    els.assistantClose.addEventListener('click', closeAssistant);
+    els.assistantRun.addEventListener('click', runAssistantCommand);
+    els.assistantCommand.addEventListener('keydown', event => {
+      if (event.key === 'Enter') runAssistantCommand();
+      if (event.key === 'Escape') closeAssistant();
+    });
+    els.assistantModal.addEventListener('click', event => {
+      if (event.target === els.assistantModal) closeAssistant();
+    });
+    document.querySelectorAll('[data-command]').forEach(button => {
+      button.addEventListener('click', () => {
+        els.assistantCommand.value = button.dataset.command;
+        runAssistantCommand();
+      });
     });
 
     function escapeHtml(value) {
