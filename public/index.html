@@ -507,6 +507,116 @@
       animation-duration: 1s;
     }
 
+    .receipt-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(8, 19, 26, .5);
+      backdrop-filter: blur(8px);
+    }
+
+    .receipt-modal.open {
+      display: flex;
+    }
+
+    .receipt-card {
+      width: min(460px, 100%);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(8, 19, 26, .3);
+      overflow: hidden;
+    }
+
+    .receipt-head {
+      padding: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .receipt-close {
+      width: 36px;
+      min-height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .14);
+      box-shadow: none;
+    }
+
+    .receipt-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .receipt-paper {
+      border: 1px dashed #c8d5dd;
+      border-radius: 12px;
+      padding: 16px;
+      background: #fbfdfe;
+      color: #172026;
+    }
+
+    .receipt-paper h3 {
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .receipt-meta {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .receipt-line {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid #e7eef3;
+      font-size: 14px;
+    }
+
+    .receipt-line small {
+      color: var(--muted);
+      display: block;
+      margin-top: 3px;
+    }
+
+    .receipt-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 14px;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent-dark);
+    }
+
+    .receipt-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .receipt-actions a {
+      min-height: 42px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
     @keyframes voicePulse {
       0% {
         transform: scale(.94);
@@ -559,6 +669,10 @@
       }
 
       .assistant-row {
+        grid-template-columns: 1fr;
+      }
+
+      .receipt-actions {
         grid-template-columns: 1fr;
       }
 
@@ -707,6 +821,25 @@
     </section>
   </div>
 
+  <div class="receipt-modal" id="receiptModal" aria-hidden="true">
+    <section class="receipt-card" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
+      <div class="receipt-head">
+        <div>
+          <h2 id="receiptTitle">Boleta generada</h2>
+          <p>Lista para imprimir o enviar por WhatsApp.</p>
+        </div>
+        <button class="receipt-close" id="receiptClose" type="button" aria-label="Cerrar">x</button>
+      </div>
+      <div class="receipt-body">
+        <div class="receipt-paper" id="receiptPaper"></div>
+        <div class="receipt-actions">
+          <button id="receiptPrint" type="button">Imprimir</button>
+          <a id="receiptWhatsapp" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <script>
     const money = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
     const dateFmt = new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' });
@@ -758,7 +891,12 @@
       assistantClose: document.querySelector('#assistantClose'),
       assistantCommand: document.querySelector('#assistantCommand'),
       assistantRun: document.querySelector('#assistantRun'),
-      assistantResult: document.querySelector('#assistantResult')
+      assistantResult: document.querySelector('#assistantResult'),
+      receiptModal: document.querySelector('#receiptModal'),
+      receiptClose: document.querySelector('#receiptClose'),
+      receiptPaper: document.querySelector('#receiptPaper'),
+      receiptPrint: document.querySelector('#receiptPrint'),
+      receiptWhatsapp: document.querySelector('#receiptWhatsapp')
     };
 
     async function loadState() {
@@ -924,6 +1062,97 @@
       state.products = state.products.filter(p => p.id !== id);
       cart = cart.filter(item => item.id !== id);
       render();
+    }
+
+    function receiptNumber(sale) {
+      return `B-${String(sale.id || '').slice(-6).toUpperCase()}`;
+    }
+
+    function receiptText(sale) {
+      const date = new Date(sale.date);
+      const lines = [
+        'MI TIENDA',
+        `Boleta: ${receiptNumber(sale)}`,
+        `Fecha: ${date.toLocaleString('es-PE')}`,
+        '',
+        'Detalle:'
+      ];
+
+      sale.items.forEach(item => {
+        lines.push(`${item.qty} x ${item.name} - ${money.format(item.price * item.qty)}`);
+      });
+
+      lines.push('', `TOTAL: ${money.format(sale.total)}`, '', 'Gracias por su compra.');
+      return lines.join('\n');
+    }
+
+    function receiptHtml(sale) {
+      const date = new Date(sale.date);
+      const rows = sale.items.map(item => `
+        <div class="receipt-line">
+          <div>
+            <strong>${escapeHtml(item.name)}</strong>
+            <small>${item.qty} x ${money.format(item.price)}</small>
+          </div>
+          <strong>${money.format(item.price * item.qty)}</strong>
+        </div>
+      `).join('');
+
+      return `
+        <h3>Mi Tienda</h3>
+        <div class="receipt-meta">
+          <div>Boleta ${receiptNumber(sale)}</div>
+          <div>${date.toLocaleString('es-PE')}</div>
+        </div>
+        ${rows}
+        <div class="receipt-total">
+          <span>Total</span>
+          <span>${money.format(sale.total)}</span>
+        </div>
+      `;
+    }
+
+    function showReceipt(sale) {
+      els.receiptPaper.innerHTML = receiptHtml(sale);
+      els.receiptWhatsapp.href = `https://wa.me/?text=${encodeURIComponent(receiptText(sale))}`;
+      els.receiptModal.classList.add('open');
+      els.receiptModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeReceipt() {
+      els.receiptModal.classList.remove('open');
+      els.receiptModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function printReceipt() {
+      const printWindow = window.open('', '_blank', 'width=420,height=720');
+      if (!printWindow) {
+        window.print();
+        return;
+      }
+
+      printWindow.document.write(`
+        <!doctype html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Boleta</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 24px; color: #172026; }
+            .receipt-paper { max-width: 320px; margin: 0 auto; }
+            h3 { text-align: center; margin: 0 0 4px; }
+            .receipt-meta { color: #657481; font-size: 12px; text-align: center; margin-bottom: 14px; }
+            .receipt-line { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 9px 0; border-bottom: 1px solid #dbe4ea; font-size: 14px; }
+            small { color: #657481; display: block; margin-top: 3px; }
+            .receipt-total { display: flex; justify-content: space-between; padding-top: 14px; font-size: 20px; font-weight: 800; }
+          </style>
+        </head>
+        <body><div class="receipt-paper">${els.receiptPaper.innerHTML}</div></body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
     }
 
     function normalizeText(value) {
@@ -1093,9 +1322,11 @@
       product.stock -= qty;
       const saleItem = { id: product.id, name: product.name, qty, price: product.price };
       const total = saleItem.price * saleItem.qty;
-      state.sales.unshift({ id: makeId(), date: new Date().toISOString(), items: [saleItem], total });
+      const sale = { id: makeId(), date: new Date().toISOString(), items: [saleItem], total };
+      state.sales.unshift(sale);
       cart = cart.filter(item => item.id !== product.id);
       render();
+      showReceipt(sale);
       return setAssistantResult(`Venta registrada: ${qty} x ${product.name}. Total ${money.format(total)}.`);
     }
 
@@ -1180,9 +1411,11 @@
         const product = state.products.find(p => p.id === item.id);
         product.stock -= item.qty;
       }
-      state.sales.unshift({ id: makeId(), date: new Date().toISOString(), items, total });
+      const sale = { id: makeId(), date: new Date().toISOString(), items, total };
+      state.sales.unshift(sale);
       cart = [];
       render();
+      showReceipt(sale);
     });
 
     els.clearCartBtn.addEventListener('click', () => {
@@ -1238,6 +1471,12 @@
         const message = runAssistantCommand();
         if (message) speakAssistant(message);
       });
+    });
+
+    els.receiptClose.addEventListener('click', closeReceipt);
+    els.receiptPrint.addEventListener('click', printReceipt);
+    els.receiptModal.addEventListener('click', event => {
+      if (event.target === els.receiptModal) closeReceipt();
     });
 
     function escapeHtml(value) {
