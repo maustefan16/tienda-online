@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Expedientes">
   <link rel="manifest" href="/manifest.webmanifest">
-  <title>Sistema de Expedientes Policiales</title>
+  <title>Registro de Expedientes PNP</title>
   <style>
     :root {
       --bg: #eef2f6;
@@ -84,7 +84,7 @@
       outline: none;
     }
 
-    textarea { min-height: 92px; resize: vertical; }
+    textarea { min-height: 86px; resize: vertical; }
     input:focus, select:focus, textarea:focus {
       border-color: rgba(29, 78, 216, .55);
       box-shadow: 0 0 0 4px rgba(29, 78, 216, .12);
@@ -106,8 +106,6 @@
       background: #edf2f7;
       border: 1px solid var(--line);
     }
-
-    button.danger { background: linear-gradient(180deg, #dc2626 0%, var(--red) 100%); }
 
     .app { display: none; min-height: 100vh; }
     .topbar {
@@ -138,11 +136,11 @@
     }
 
     main {
-      max-width: 1320px;
+      max-width: 1440px;
       margin: 0 auto;
       padding: 22px;
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 430px 1fr;
       gap: 18px;
       align-items: start;
     }
@@ -170,7 +168,6 @@
     .panel-body { padding: 18px; }
     .grid { display: grid; gap: 12px; }
     .grid.two { grid-template-columns: 1fr 1fr; }
-    .grid.three { grid-template-columns: repeat(3, 1fr); }
 
     .stats {
       display: grid;
@@ -198,7 +195,7 @@
     .stat strong { font-size: 24px; }
     .toolbar {
       display: grid;
-      grid-template-columns: 1.5fr 120px 150px 150px;
+      grid-template-columns: 1.4fr 120px 150px 170px;
       gap: 10px;
       margin-bottom: 14px;
     }
@@ -208,7 +205,7 @@
       border-radius: 12px;
       background: #fff;
       overflow: auto;
-      max-height: 520px;
+      max-height: 560px;
     }
 
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -230,21 +227,19 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
+      color: #1e3a8a;
+      background: #dbeafe;
     }
-    .status.abierto { color: #1e3a8a; background: #dbeafe; }
-    .status.cerrado { color: var(--green); background: #dcfce7; }
+    .status.estimado { color: var(--green); background: #dcfce7; }
+    .status.observado { color: var(--amber); background: #fef3c7; }
     .status.archivado { color: #475569; background: #e2e8f0; }
-    .status.reservado { color: var(--amber); background: #fef3c7; }
+    .status.devuelto { color: var(--red); background: #fee2e2; }
 
     .empty { color: var(--muted); text-align: center; padding: 28px; }
-    .detail {
-      display: grid;
-      gap: 12px;
-      color: #1f2937;
-    }
+    .detail { display: grid; gap: 12px; color: #1f2937; }
     .detail-row {
       display: grid;
-      grid-template-columns: 150px 1fr;
+      grid-template-columns: 190px 1fr;
       gap: 10px;
       padding-bottom: 10px;
       border-bottom: 1px solid #eef2f7;
@@ -261,14 +256,21 @@
       line-height: 1.45;
     }
 
-    @media (max-width: 980px) {
+    @media print {
+      .topbar, main > .panel, .stats, .toolbar, .actions { display: none !important; }
+      main { display: block; padding: 0; }
+      .panel { box-shadow: none; border: 0; }
+      .panel-body { padding: 0; }
+    }
+
+    @media (max-width: 1080px) {
       main { grid-template-columns: 1fr; }
       .stats { grid-template-columns: repeat(2, 1fr); }
       .toolbar { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 620px) {
+    @media (max-width: 640px) {
       main { padding: 14px; }
-      .grid.two, .grid.three, .stats, .toolbar { grid-template-columns: 1fr; }
+      .grid.two, .stats, .toolbar { grid-template-columns: 1fr; }
       .detail-row { grid-template-columns: 1fr; }
     }
   </style>
@@ -277,17 +279,17 @@
   <section class="login" id="loginView">
     <form class="login-card" id="loginForm">
       <div class="login-head">
-        <h1>Expedientes Policiales</h1>
+        <h1>Expedientes PNP</h1>
         <p>Acceso institucional para registro y consulta documental.</p>
       </div>
       <div class="login-body">
-        <div class="note">Prototipo inicial. No ingresar datos reales sensibles hasta configurar autenticación institucional y políticas de acceso.</div>
+        <div class="note">Prototipo inicial. No ingresar datos reales sensibles hasta configurar autenticacion institucional y politicas de acceso.</div>
         <div>
           <label for="user">Usuario</label>
           <input id="user" autocomplete="username" required placeholder="admin">
         </div>
         <div>
-          <label for="pass">Contraseña</label>
+          <label for="pass">Contrasena</label>
           <input id="pass" type="password" autocomplete="current-password" required placeholder="demo2026">
         </div>
         <button>Ingresar</button>
@@ -299,12 +301,12 @@
   <section class="app" id="appView">
     <header class="topbar">
       <div class="brand">
-        <h1>Sistema de Gestión y Consulta de Expedientes Policiales</h1>
-        <p>Registro, búsqueda, trazabilidad y control documental.</p>
+        <h1>Registro DEPINC de Expedientes PNP</h1>
+        <p>Formato basado en el cuaderno tecnico: HT/SGD, unidad, propuesta, dictamen, oficios y pronunciamiento.</p>
       </div>
       <div class="user-box">
         <span class="badge" id="sessionBadge">Operador</span>
-        <button class="secondary" id="logoutBtn">Cerrar sesión</button>
+        <button class="secondary" id="logoutBtn">Cerrar sesion</button>
       </div>
     </header>
 
@@ -317,66 +319,99 @@
           <form class="grid" id="caseForm">
             <div class="grid two">
               <div>
-                <label for="caseNumber">N° expediente</label>
-                <input id="caseNumber" required placeholder="EXP-2026-0001">
+                <label for="regDepinc">Reg. DEPINC</label>
+                <input id="regDepinc" required placeholder="292">
               </div>
               <div>
-                <label for="year">Año</label>
-                <input id="year" type="number" required min="1950" max="2100">
+                <label for="htSgd">HT/SGD</label>
+                <input id="htSgd" placeholder="PNP...">
               </div>
-            </div>
-            <div>
-              <label for="dependency">Dependencia policial</label>
-              <input id="dependency" required placeholder="Comisaría / Unidad">
             </div>
             <div class="grid two">
               <div>
-                <label for="caseType">Tipo de caso</label>
-                <select id="caseType">
-                  <option>Denuncia</option>
-                  <option>Investigación</option>
-                  <option>Parte policial</option>
-                  <option>Acta</option>
-                  <option>Otro</option>
-                </select>
+                <label for="fecha">Fecha</label>
+                <input id="fecha" type="date">
               </div>
               <div>
-                <label for="status">Estado</label>
-                <select id="status">
-                  <option>Abierto</option>
-                  <option>Cerrado</option>
+                <label for="estado">Estado</label>
+                <select id="estado">
+                  <option>En tramite</option>
+                  <option>Estimado</option>
+                  <option>Observado</option>
+                  <option>Devuelto</option>
                   <option>Archivado</option>
-                  <option>Reservado</option>
                 </select>
               </div>
             </div>
-            <div class="grid two">
-              <div>
-                <label for="personA">Denunciante / solicitante</label>
-                <input id="personA" placeholder="Apellidos y nombres">
-              </div>
-              <div>
-                <label for="personB">Investigado / vinculado</label>
-                <input id="personB" placeholder="Apellidos y nombres">
-              </div>
+            <div>
+              <label for="regionUnidad">Region / division / unidad</label>
+              <input id="regionUnidad" required placeholder="REGION - DIVISION - UNIDAD">
             </div>
             <div class="grid two">
               <div>
-                <label for="dni">DNI / documento</label>
-                <input id="dni" placeholder="Opcional">
+                <label for="gradoPnp">Grado PNP</label>
+                <input id="gradoPnp" placeholder="COMANDANTE PNP">
               </div>
               <div>
-                <label for="entryDate">Fecha de ingreso</label>
-                <input id="entryDate" type="date">
+                <label for="apellidosNombres">Apellidos y nombres</label>
+                <input id="apellidosNombres" required placeholder="Apellidos y nombres">
               </div>
             </div>
             <div>
-              <label for="summary">Resumen / materia</label>
-              <textarea id="summary" placeholder="Descripción breve del expediente"></textarea>
+              <label for="casoBanda">Caso y/o banda criminal</label>
+              <textarea id="casoBanda" placeholder="Caso, banda criminal, materia o descripcion breve"></textarea>
             </div>
             <div>
-              <label for="notes">Observaciones</label>
-              <textarea id="notes" placeholder="Movimientos, ubicación física, folios, anexos"></textarea>
+              <label for="propuesta">Propuesta</label>
+              <input id="propuesta" placeholder="Accion distinguida, ascenso, reconocimiento, etc.">
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="oficioUniasjur">Oficio / fecha UNIASJUR</label>
+                <input id="oficioUniasjur" placeholder="Oficio Nro. / fecha">
+              </div>
+              <div>
+                <label for="informe">Informe Nro.</label>
+                <input id="informe" placeholder="Informe Nro.">
+              </div>
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="dictamen">Dictamen Nro. / fecha</label>
+                <input id="dictamen" placeholder="Dictamen Nro. / fecha">
+              </div>
+              <div>
+                <label for="observacionesDictamen">Observaciones dictamen</label>
+                <input id="observacionesDictamen" placeholder="Viable, observado, pendiente">
+              </div>
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="oficioDepincCios">Oficio DEPINC-CIOS</label>
+                <input id="oficioDepincCios" placeholder="Oficio Nro.">
+              </div>
+              <div>
+                <label for="oficioCiosDepinc">Oficio CIOS-DEPINC</label>
+                <input id="oficioCiosDepinc" placeholder="Oficio Nro.">
+              </div>
+            </div>
+            <div>
+              <label for="observacionesEstimar">Observaciones y/o estimar</label>
+              <textarea id="observacionesEstimar" placeholder="Movimientos, ubicacion fisica, folios, anexos u observaciones"></textarea>
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="actaPronunciamiento">Acta de pronunciamiento</label>
+                <input id="actaPronunciamiento" placeholder="Acta / fecha">
+              </div>
+              <div>
+                <label for="pronunciamiento">Pronunciamiento</label>
+                <input id="pronunciamiento" placeholder="Resultado final">
+              </div>
+            </div>
+            <div>
+              <label for="responsableTecnico">Responsable tecnico / nota final</label>
+              <input id="responsableTecnico" placeholder="Opcional">
             </div>
             <button>Guardar expediente</button>
           </form>
@@ -386,9 +421,9 @@
       <section>
         <div class="stats">
           <div class="stat"><span>Total</span><strong id="totalCases">0</strong></div>
-          <div class="stat"><span>Abiertos</span><strong id="openCases">0</strong></div>
-          <div class="stat"><span>Archivados</span><strong id="archivedCases">0</strong></div>
-          <div class="stat"><span>Reservados</span><strong id="reservedCases">0</strong></div>
+          <div class="stat"><span>Anio actual</span><strong id="currentYearCases">0</strong></div>
+          <div class="stat"><span>Estimados</span><strong id="estimatedCases">0</strong></div>
+          <div class="stat"><span>Observados</span><strong id="observedCases">0</strong></div>
         </div>
 
         <section class="panel">
@@ -401,19 +436,19 @@
           </div>
           <div class="panel-body">
             <div class="toolbar">
-              <input id="search" placeholder="Buscar por expediente, DNI, nombres o dependencia">
-              <select id="filterYear"><option value="">Todos los años</option></select>
+              <input id="search" placeholder="Buscar por HT/SGD, nombres, caso, unidad u oficio">
+              <select id="filterYear"><option value="">Todos los anios</option></select>
               <select id="filterStatus"><option value="">Todos los estados</option></select>
-              <select id="filterType"><option value="">Todos los tipos</option></select>
+              <select id="filterProposal"><option value="">Todas las propuestas</option></select>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Expediente</th>
-                    <th>Año</th>
-                    <th>Dependencia</th>
-                    <th>Personas vinculadas</th>
+                    <th>Reg. / HT-SGD</th>
+                    <th>Fecha</th>
+                    <th>Grado / nombres</th>
+                    <th>Caso y propuesta</th>
                     <th>Estado</th>
                   </tr>
                 </thead>
@@ -425,8 +460,8 @@
 
         <section class="panel" style="margin-top:18px">
           <div class="panel-head">
-            <h2>Detalle del expediente</h2>
-            <span class="badge" id="selectedBadge">Sin selección</span>
+            <h2>Ficha del expediente</h2>
+            <span class="badge" id="selectedBadge">Sin seleccion</span>
           </div>
           <div class="panel-body">
             <div id="caseDetail" class="empty">Seleccione un expediente para ver la ficha completa.</div>
@@ -437,31 +472,46 @@
   </section>
 
   <script>
-    const storeKey = 'expedientes.policiales.demo.v1';
+    const storeKey = 'expedientes.policiales.demo.v2';
     const makeId = () => crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const today = new Date().toISOString().slice(0, 10);
+    const currentYear = new Date().getFullYear();
 
     const starterState = {
       cases: [
         {
           id: 'demo-001',
-          number: 'EXP-2026-0001',
-          year: 2026,
-          dependency: 'Comisaría Central',
-          type: 'Denuncia',
-          status: 'Abierto',
-          personA: 'Registro demostrativo',
-          personB: 'Sin datos reales',
-          dni: '',
-          entryDate: today,
-          summary: 'Expediente de ejemplo para validar búsqueda y ficha.',
-          notes: 'No utilizar datos personales reales en este prototipo.',
+          regDepinc: '001',
+          htSgd: 'PNP-DEMO-2026',
+          fecha: today,
+          regionUnidad: 'DIRNIC-PNP / DIVINCRI / DEPINC',
+          gradoPnp: 'GRADO PNP',
+          apellidosNombres: 'Registro demostrativo',
+          casoBanda: 'Expediente de ejemplo para validar busqueda, ficha y exportacion.',
+          propuesta: 'Accion distinguida',
+          oficioUniasjur: '',
+          informe: '',
+          dictamen: '',
+          observacionesDictamen: 'Registro demo',
+          oficioDepincCios: '',
+          oficioCiosDepinc: '',
+          observacionesEstimar: 'No utilizar datos personales reales en este prototipo.',
+          actaPronunciamiento: '',
+          pronunciamiento: '',
+          estado: 'En tramite',
+          responsableTecnico: 'Sistema',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          history: [{ date: new Date().toISOString(), action: 'Creación de expediente demo', user: 'Sistema' }]
+          history: [{ date: new Date().toISOString(), action: 'Creacion de expediente demo', user: 'Sistema' }]
         }
       ]
     };
+
+    const fields = [
+      'regDepinc','htSgd','fecha','regionUnidad','gradoPnp','apellidosNombres','casoBanda','propuesta',
+      'oficioUniasjur','informe','dictamen','observacionesDictamen','oficioDepincCios','oficioCiosDepinc',
+      'observacionesEstimar','actaPronunciamiento','pronunciamiento','estado','responsableTecnico'
+    ];
 
     const els = {
       loginView: document.querySelector('#loginView'),
@@ -471,31 +521,21 @@
       pass: document.querySelector('#pass'),
       logoutBtn: document.querySelector('#logoutBtn'),
       caseForm: document.querySelector('#caseForm'),
-      caseNumber: document.querySelector('#caseNumber'),
-      year: document.querySelector('#year'),
-      dependency: document.querySelector('#dependency'),
-      caseType: document.querySelector('#caseType'),
-      status: document.querySelector('#status'),
-      personA: document.querySelector('#personA'),
-      personB: document.querySelector('#personB'),
-      dni: document.querySelector('#dni'),
-      entryDate: document.querySelector('#entryDate'),
-      summary: document.querySelector('#summary'),
-      notes: document.querySelector('#notes'),
       search: document.querySelector('#search'),
       filterYear: document.querySelector('#filterYear'),
       filterStatus: document.querySelector('#filterStatus'),
-      filterType: document.querySelector('#filterType'),
+      filterProposal: document.querySelector('#filterProposal'),
       caseRows: document.querySelector('#caseRows'),
       caseDetail: document.querySelector('#caseDetail'),
       selectedBadge: document.querySelector('#selectedBadge'),
       totalCases: document.querySelector('#totalCases'),
-      openCases: document.querySelector('#openCases'),
-      archivedCases: document.querySelector('#archivedCases'),
-      reservedCases: document.querySelector('#reservedCases'),
+      currentYearCases: document.querySelector('#currentYearCases'),
+      estimatedCases: document.querySelector('#estimatedCases'),
+      observedCases: document.querySelector('#observedCases'),
       exportBtn: document.querySelector('#exportBtn'),
       printBtn: document.querySelector('#printBtn')
     };
+    fields.forEach(field => els[field] = document.querySelector(`#${field}`));
 
     let state = starterState;
     let selectedId = null;
@@ -511,6 +551,41 @@
 
     function normalize(value) {
       return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function getYear(item) {
+      const source = item.fecha || item.entryDate || '';
+      const year = Number(String(source).slice(0, 4));
+      return Number.isFinite(year) && year > 0 ? year : currentYear;
+    }
+
+    function normalizeRecord(item) {
+      const now = new Date().toISOString();
+      return {
+        id: item.id || makeId(),
+        regDepinc: item.regDepinc || item.number || '',
+        htSgd: item.htSgd || '',
+        fecha: item.fecha || item.entryDate || today,
+        regionUnidad: item.regionUnidad || item.dependency || '',
+        gradoPnp: item.gradoPnp || '',
+        apellidosNombres: item.apellidosNombres || item.personA || '',
+        casoBanda: item.casoBanda || item.summary || '',
+        propuesta: item.propuesta || item.type || '',
+        oficioUniasjur: item.oficioUniasjur || '',
+        informe: item.informe || '',
+        dictamen: item.dictamen || '',
+        observacionesDictamen: item.observacionesDictamen || '',
+        oficioDepincCios: item.oficioDepincCios || '',
+        oficioCiosDepinc: item.oficioCiosDepinc || '',
+        observacionesEstimar: item.observacionesEstimar || item.notes || '',
+        actaPronunciamiento: item.actaPronunciamiento || '',
+        pronunciamiento: item.pronunciamiento || '',
+        estado: item.estado || item.status || 'En tramite',
+        responsableTecnico: item.responsableTecnico || '',
+        createdAt: item.createdAt || now,
+        updatedAt: item.updatedAt || item.createdAt || now,
+        history: Array.isArray(item.history) ? item.history : []
+      };
     }
 
     async function loadState() {
@@ -543,36 +618,48 @@
       if (sessionStorage.getItem('expedientes.session') === 'ok') showApp();
     }
 
+    function searchableText(item) {
+      return [
+        item.regDepinc, item.htSgd, item.fecha, item.regionUnidad, item.gradoPnp, item.apellidosNombres,
+        item.casoBanda, item.propuesta, item.oficioUniasjur, item.informe, item.dictamen,
+        item.oficioDepincCios, item.oficioCiosDepinc, item.observacionesEstimar, item.pronunciamiento
+      ].join(' ');
+    }
+
     function filteredCases() {
       const term = normalize(els.search.value);
       return state.cases
-        .filter(item => !term || normalize([item.number, item.dni, item.personA, item.personB, item.dependency, item.summary].join(' ')).includes(term))
-        .filter(item => !els.filterYear.value || String(item.year) === els.filterYear.value)
-        .filter(item => !els.filterStatus.value || item.status === els.filterStatus.value)
-        .filter(item => !els.filterType.value || item.type === els.filterType.value)
+        .filter(item => !term || normalize(searchableText(item)).includes(term))
+        .filter(item => !els.filterYear.value || String(getYear(item)) === els.filterYear.value)
+        .filter(item => !els.filterStatus.value || item.estado === els.filterStatus.value)
+        .filter(item => !els.filterProposal.value || item.propuesta === els.filterProposal.value)
         .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
     }
 
     function renderFilters() {
       const year = els.filterYear.value;
       const status = els.filterStatus.value;
-      const type = els.filterType.value;
-      const years = [...new Set(state.cases.map(item => item.year).filter(Boolean))].sort((a, b) => b - a);
-      const statuses = [...new Set(state.cases.map(item => item.status).filter(Boolean))].sort();
-      const types = [...new Set(state.cases.map(item => item.type).filter(Boolean))].sort();
-      els.filterYear.innerHTML = '<option value="">Todos los años</option>' + years.map(y => `<option>${y}</option>`).join('');
+      const proposal = els.filterProposal.value;
+      const years = [...new Set(state.cases.map(getYear))].sort((a, b) => b - a);
+      const statuses = [...new Set(state.cases.map(item => item.estado).filter(Boolean))].sort();
+      const proposals = [...new Set(state.cases.map(item => item.propuesta).filter(Boolean))].sort();
+      els.filterYear.innerHTML = '<option value="">Todos los anios</option>' + years.map(y => `<option>${y}</option>`).join('');
       els.filterStatus.innerHTML = '<option value="">Todos los estados</option>' + statuses.map(s => `<option>${escapeHtml(s)}</option>`).join('');
-      els.filterType.innerHTML = '<option value="">Todos los tipos</option>' + types.map(t => `<option>${escapeHtml(t)}</option>`).join('');
+      els.filterProposal.innerHTML = '<option value="">Todas las propuestas</option>' + proposals.map(t => `<option>${escapeHtml(t)}</option>`).join('');
       els.filterYear.value = years.includes(Number(year)) ? year : '';
       els.filterStatus.value = statuses.includes(status) ? status : '';
-      els.filterType.value = types.includes(type) ? type : '';
+      els.filterProposal.value = proposals.includes(proposal) ? proposal : '';
     }
 
     function renderStats() {
       els.totalCases.textContent = state.cases.length;
-      els.openCases.textContent = state.cases.filter(item => item.status === 'Abierto').length;
-      els.archivedCases.textContent = state.cases.filter(item => item.status === 'Archivado').length;
-      els.reservedCases.textContent = state.cases.filter(item => item.status === 'Reservado').length;
+      els.currentYearCases.textContent = state.cases.filter(item => getYear(item) === currentYear).length;
+      els.estimatedCases.textContent = state.cases.filter(item => item.estado === 'Estimado').length;
+      els.observedCases.textContent = state.cases.filter(item => item.estado === 'Observado').length;
+    }
+
+    function statusClass(status) {
+      return normalize(status).replace(/\s+/g, '-');
     }
 
     function renderRows() {
@@ -583,11 +670,11 @@
       }
       els.caseRows.innerHTML = cases.map(item => `
         <tr onclick="selectCase('${item.id}')">
-          <td><strong>${escapeHtml(item.number)}</strong><br><small>${escapeHtml(item.type)}</small></td>
-          <td>${escapeHtml(item.year)}</td>
-          <td>${escapeHtml(item.dependency)}</td>
-          <td>${escapeHtml(item.personA || 'No registrado')}<br><small>${escapeHtml(item.personB || '')}</small></td>
-          <td><span class="status ${normalize(item.status)}">${escapeHtml(item.status)}</span></td>
+          <td><strong>${escapeHtml(item.regDepinc || 'Sin reg.')}</strong><br><small>${escapeHtml(item.htSgd || 'Sin HT/SGD')}</small></td>
+          <td>${escapeHtml(item.fecha || '')}</td>
+          <td>${escapeHtml(item.gradoPnp || '')}<br><small>${escapeHtml(item.apellidosNombres || 'No registrado')}</small></td>
+          <td>${escapeHtml(item.casoBanda || 'Sin caso')}<br><small>${escapeHtml(item.propuesta || '')}</small></td>
+          <td><span class="status ${statusClass(item.estado)}">${escapeHtml(item.estado)}</span></td>
         </tr>
       `).join('');
     }
@@ -601,31 +688,39 @@
     function renderDetail() {
       const item = state.cases.find(record => record.id === selectedId);
       if (!item) {
-        els.selectedBadge.textContent = 'Sin selección';
+        els.selectedBadge.textContent = 'Sin seleccion';
         els.caseDetail.className = 'empty';
         els.caseDetail.textContent = 'Seleccione un expediente para ver la ficha completa.';
         return;
       }
-      els.selectedBadge.textContent = item.number;
+      els.selectedBadge.textContent = item.htSgd || item.regDepinc || 'Seleccionado';
       els.caseDetail.className = 'detail';
       els.caseDetail.innerHTML = `
-        ${detailRow('Expediente', item.number)}
-        ${detailRow('Año', item.year)}
-        ${detailRow('Dependencia', item.dependency)}
-        ${detailRow('Tipo', item.type)}
-        ${detailRow('Estado', item.status)}
-        ${detailRow('Fecha ingreso', item.entryDate || 'No registrada')}
-        ${detailRow('Denunciante', item.personA || 'No registrado')}
-        ${detailRow('Vinculado', item.personB || 'No registrado')}
-        ${detailRow('Documento', item.dni || 'No registrado')}
-        ${detailRow('Resumen', item.summary || 'Sin resumen')}
-        ${detailRow('Observaciones', item.notes || 'Sin observaciones')}
-        ${detailRow('Última actualización', new Date(item.updatedAt).toLocaleString('es-PE'))}
+        ${detailRow('Reg. DEPINC', item.regDepinc)}
+        ${detailRow('HT/SGD', item.htSgd)}
+        ${detailRow('Fecha', item.fecha)}
+        ${detailRow('Region / unidad', item.regionUnidad)}
+        ${detailRow('Grado PNP', item.gradoPnp)}
+        ${detailRow('Apellidos y nombres', item.apellidosNombres)}
+        ${detailRow('Caso y/o banda', item.casoBanda)}
+        ${detailRow('Propuesta', item.propuesta)}
+        ${detailRow('Oficio UNIASJUR', item.oficioUniasjur)}
+        ${detailRow('Informe', item.informe)}
+        ${detailRow('Dictamen', item.dictamen)}
+        ${detailRow('Obs. dictamen', item.observacionesDictamen)}
+        ${detailRow('Oficio DEPINC-CIOS', item.oficioDepincCios)}
+        ${detailRow('Oficio CIOS-DEPINC', item.oficioCiosDepinc)}
+        ${detailRow('Obs. / estimar', item.observacionesEstimar)}
+        ${detailRow('Acta pronunc.', item.actaPronunciamiento)}
+        ${detailRow('Pronunciamiento', item.pronunciamiento)}
+        ${detailRow('Estado', item.estado)}
+        ${detailRow('Responsable / nota', item.responsableTecnico)}
+        ${detailRow('Ultima actualizacion', new Date(item.updatedAt).toLocaleString('es-PE'))}
       `;
     }
 
     function detailRow(label, value) {
-      return `<div class="detail-row"><span>${escapeHtml(label)}</span><div>${escapeHtml(value)}</div></div>`;
+      return `<div class="detail-row"><span>${escapeHtml(label)}</span><div>${escapeHtml(value || 'No registrado')}</div></div>`;
     }
 
     function render() {
@@ -643,7 +738,7 @@
         showApp();
         return;
       }
-      alert('Credenciales no válidas.');
+      alert('Credenciales no validas.');
     });
 
     els.logoutBtn.addEventListener('click', () => {
@@ -654,48 +749,37 @@
     els.caseForm.addEventListener('submit', event => {
       event.preventDefault();
       const now = new Date().toISOString();
-      const record = {
-        id: makeId(),
-        number: els.caseNumber.value.trim(),
-        year: Number(els.year.value),
-        dependency: els.dependency.value.trim(),
-        type: els.caseType.value,
-        status: els.status.value,
-        personA: els.personA.value.trim(),
-        personB: els.personB.value.trim(),
-        dni: els.dni.value.trim(),
-        entryDate: els.entryDate.value || today,
-        summary: els.summary.value.trim(),
-        notes: els.notes.value.trim(),
-        createdAt: now,
-        updatedAt: now,
-        history: [{ date: now, action: 'Registro inicial', user: 'Operador demo' }]
-      };
+      const record = { id: makeId(), createdAt: now, updatedAt: now, history: [{ date: now, action: 'Registro inicial', user: 'Operador demo' }] };
+      fields.forEach(field => record[field] = els[field].value.trim());
+      record.fecha = record.fecha || today;
+      record.estado = record.estado || 'En tramite';
       state.cases.unshift(record);
       selectedId = record.id;
       els.caseForm.reset();
-      els.year.value = new Date().getFullYear();
-      els.entryDate.value = today;
+      els.fecha.value = today;
+      els.estado.value = 'En tramite';
       render();
     });
 
-    [els.search, els.filterYear, els.filterStatus, els.filterType].forEach(control => {
-      control.addEventListener('input', () => {
-        renderRows();
-      });
-      control.addEventListener('change', () => {
-        renderRows();
-      });
+    [els.search, els.filterYear, els.filterStatus, els.filterProposal].forEach(control => {
+      control.addEventListener('input', renderRows);
+      control.addEventListener('change', renderRows);
     });
 
     els.exportBtn.addEventListener('click', () => {
-      const rows = [['Expediente','Año','Dependencia','Tipo','Estado','Denunciante','Vinculado','DNI','Fecha','Resumen']];
-      filteredCases().forEach(item => rows.push([item.number,item.year,item.dependency,item.type,item.status,item.personA,item.personB,item.dni,item.entryDate,item.summary]));
+      const headers = [
+        'REG DEPINC','HT/SGD','FECHA','REGION-DIVISION-UNIDAD','GRADO PNP','APELLIDOS Y NOMBRES',
+        'CASO Y/O BANDA CRIMINAL','PROPUESTA','OFICIO UNIASJUR','INFORME','DICTAMEN',
+        'OBSERVACIONES DICTAMEN','OFICIO DEPINC-CIOS','OFICIO CIOS-DEPINC','OBSERVACIONES Y/O ESTIMAR',
+        'ACTA DE PRONUNCIAMIENTO','PRONUNCIAMIENTO','ESTADO','RESPONSABLE TECNICO'
+      ];
+      const rows = [headers];
+      filteredCases().forEach(item => rows.push(fields.map(field => item[field] ?? '')));
       const csv = rows.map(row => row.map(value => `"${String(value ?? '').replaceAll('"','""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'expedientes-policiales.csv';
+      link.download = 'expedientes-pnp-depinc.csv';
       link.click();
       URL.revokeObjectURL(link.href);
     });
@@ -706,10 +790,10 @@
     });
 
     async function init() {
-      els.year.value = new Date().getFullYear();
-      els.entryDate.value = today;
+      els.fecha.value = today;
       state = await loadState();
       if (!state.cases) state = starterState;
+      state.cases = state.cases.map(normalizeRecord);
       requireSession();
     }
 
