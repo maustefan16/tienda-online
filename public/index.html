@@ -421,7 +421,7 @@
       <section>
         <div class="stats">
           <div class="stat"><span>Total</span><strong id="totalCases">0</strong></div>
-          <div class="stat"><span>Anio actual</span><strong id="currentYearCases">0</strong></div>
+          <div class="stat"><span>Año actual</span><strong id="currentYearCases">0</strong></div>
           <div class="stat"><span>Estimados</span><strong id="estimatedCases">0</strong></div>
           <div class="stat"><span>Observados</span><strong id="observedCases">0</strong></div>
         </div>
@@ -437,7 +437,7 @@
           <div class="panel-body">
             <div class="toolbar">
               <input id="search" placeholder="Buscar por HT/SGD, nombres, caso, unidad u oficio">
-              <select id="filterYear"><option value="">Todos los anios</option></select>
+              <select id="filterYear"><option value="">Todos los años</option></select>
               <select id="filterStatus"><option value="">Todos los estados</option></select>
               <select id="filterProposal"><option value="">Todas las propuestas</option></select>
             </div>
@@ -643,7 +643,7 @@
       const years = [...new Set(state.cases.map(getYear))].sort((a, b) => b - a);
       const statuses = [...new Set(state.cases.map(item => item.estado).filter(Boolean))].sort();
       const proposals = [...new Set(state.cases.map(item => item.propuesta).filter(Boolean))].sort();
-      els.filterYear.innerHTML = '<option value="">Todos los anios</option>' + years.map(y => `<option>${y}</option>`).join('');
+      els.filterYear.innerHTML = '<option value="">Todos los años</option>' + years.map(y => `<option>${y}</option>`).join('');
       els.filterStatus.innerHTML = '<option value="">Todos los estados</option>' + statuses.map(s => `<option>${escapeHtml(s)}</option>`).join('');
       els.filterProposal.innerHTML = '<option value="">Todas las propuestas</option>' + proposals.map(t => `<option>${escapeHtml(t)}</option>`).join('');
       els.filterYear.value = years.includes(Number(year)) ? year : '';
