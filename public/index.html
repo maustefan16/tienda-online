@@ -286,14 +286,14 @@
         <div class="note">Prototipo inicial. No ingresar datos reales sensibles hasta configurar autenticacion institucional y politicas de acceso.</div>
         <div>
           <label for="user">Usuario</label>
-          <input id="user" autocomplete="username" required placeholder="admin">
+          <input id="user" autocomplete="username" required placeholder="anakaren">
         </div>
         <div>
           <label for="pass">Contrasena</label>
-          <input id="pass" type="password" autocomplete="current-password" required placeholder="demo2026">
+          <input id="pass" type="password" autocomplete="current-password" required placeholder="1234">
         </div>
         <button>Ingresar</button>
-        <small style="color:var(--muted)">Demo: admin / demo2026</small>
+        <small style="color:var(--muted)">Acceso: anakaren / 1234</small>
       </div>
     </form>
   </section>
@@ -733,7 +733,7 @@
 
     els.loginForm.addEventListener('submit', event => {
       event.preventDefault();
-      if (els.user.value.trim() === 'admin' && els.pass.value === 'demo2026') {
+      if (els.user.value.trim().toLowerCase() === 'anakaren' && els.pass.value === '1234') {
         sessionStorage.setItem('expedientes.session', 'ok');
         showApp();
         return;
