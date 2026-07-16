@@ -3,82 +3,147 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#102027">
+  <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Tienda">
+  <meta name="apple-mobile-web-app-title" content="Expedientes">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <title>Sistema de Tienda</title>
+  <title>Sistema de Expedientes Policiales</title>
   <style>
     :root {
-      --bg: #eef3f6;
+      --bg: #eef2f6;
       --panel: #ffffff;
-      --ink: #172026;
-      --muted: #657481;
-      --line: #dbe4ea;
-      --accent: #0f766e;
-      --accent-dark: #0b4f4a;
-      --accent-2: #1d4ed8;
-      --danger: #b42318;
-      --warning: #b45309;
-      --success: #14804a;
-      --soft: #e9f7f4;
-      --soft-blue: #edf4ff;
-      --shadow: 0 18px 50px rgba(15, 34, 45, .12);
+      --ink: #111827;
+      --muted: #64748b;
+      --line: #d9e2ec;
+      --navy: #0f172a;
+      --blue: #1d4ed8;
+      --blue-dark: #1e3a8a;
+      --green: #166534;
+      --amber: #92400e;
+      --red: #991b1b;
+      --soft: #f8fafc;
+      --shadow: 0 18px 50px rgba(15, 23, 42, .12);
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, .16), transparent 34%),
-        linear-gradient(180deg, #f8fbfc 0%, var(--bg) 45%, #e8eef2 100%);
+      background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
       color: var(--ink);
     }
 
-    header {
+    .login {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
       background:
-        linear-gradient(135deg, #102027 0%, #12383c 52%, #0f766e 100%);
+        radial-gradient(circle at 15% 15%, rgba(29, 78, 216, .14), transparent 32%),
+        linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    }
+
+    .login-card {
+      width: min(460px, 100%);
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .26);
+      overflow: hidden;
+    }
+
+    .login-head {
+      padding: 26px;
       color: #fff;
-      padding: 24px clamp(16px, 4vw, 42px);
+      background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+    }
+
+    .login-head h1 { margin: 0 0 8px; font-size: 26px; }
+    .login-head p { margin: 0; color: rgba(255,255,255,.78); }
+    .login-body { padding: 22px; display: grid; gap: 14px; }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(29, 78, 216, .55);
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, .12);
+    }
+
+    button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue-dark) 100%);
+    }
+
+    button.secondary {
+      color: var(--ink);
+      background: #edf2f7;
+      border: 1px solid var(--line);
+    }
+
+    button.danger { background: linear-gradient(180deg, #dc2626 0%, var(--red) 100%); }
+
+    .app { display: none; min-height: 100vh; }
+    .topbar {
+      background: #0f172a;
+      color: #fff;
+      padding: 18px clamp(16px, 4vw, 40px);
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 16px;
       flex-wrap: wrap;
-      box-shadow: 0 14px 32px rgba(16, 32, 39, .22);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, .24);
     }
 
-    h1, h2, h3, p {
-      margin: 0;
-    }
-
-    h1 {
-      font-size: clamp(26px, 4vw, 38px);
-      letter-spacing: 0;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-
-    header p {
-      color: rgba(255, 255, 255, .76);
-      font-size: 14px;
+    .brand h1 { margin: 0 0 5px; font-size: clamp(22px, 3vw, 32px); }
+    .brand p { margin: 0; color: rgba(255,255,255,.72); font-size: 14px; }
+    .user-box { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-grid;
+      place-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     main {
-      max-width: 1240px;
+      max-width: 1320px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 22px;
       display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 20px;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
       align-items: start;
     }
 
@@ -87,260 +152,37 @@
       border: 1px solid var(--line);
       border-radius: 14px;
       box-shadow: var(--shadow);
-      min-width: 0;
       overflow: hidden;
     }
 
     .panel-head {
-      padding: 18px 18px 16px;
+      padding: 16px 18px;
       border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 12px;
+      align-items: center;
       flex-wrap: wrap;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
     }
 
-    .panel-head h2 {
-      font-size: 18px;
-      line-height: 1.1;
-    }
-
-    .panel-body {
-      padding: 18px;
-    }
-
-    .toolbar {
-      display: grid;
-      grid-template-columns: minmax(180px, 1fr) 150px 120px 116px 42px;
-      gap: 10px;
-      align-items: end;
-      margin-bottom: 16px;
-      padding: 14px;
-      border: 1px solid #e7eef3;
-      border-radius: 12px;
-      background: #f8fbfc;
-    }
-
-    label {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 5px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    input, select {
-      width: 100%;
-      min-height: 42px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 9px 12px;
-      color: var(--ink);
-      background: #fff;
-      font-size: 14px;
-      outline: none;
-      transition: border-color .16s ease, box-shadow .16s ease;
-    }
-
-    input:focus, select:focus {
-      border-color: rgba(15, 118, 110, .55);
-      box-shadow: 0 0 0 4px rgba(15, 118, 110, .12);
-    }
-
-    button {
-      min-height: 42px;
-      border: 0;
-      border-radius: 10px;
-      padding: 9px 14px;
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 8px 18px rgba(15, 118, 110, .2);
-      transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
-    }
-
-    button:hover {
-      filter: brightness(.96);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(15, 118, 110, .24);
-    }
-
-    button:active {
-      transform: translateY(0);
-      box-shadow: 0 5px 12px rgba(15, 118, 110, .18);
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      filter: grayscale(.1);
-      opacity: .55;
-      transform: none;
-      box-shadow: none;
-    }
-
-    button.secondary {
-      background: #edf2f6;
-      color: var(--ink);
-      border: 1px solid #dce6ec;
-      box-shadow: none;
-    }
-
-    button.blue {
-      background: linear-gradient(180deg, #2563eb 0%, var(--accent-2) 100%);
-      box-shadow: 0 10px 24px rgba(37, 99, 235, .22);
-    }
-
-    button.danger {
-      background: linear-gradient(180deg, #dc2626 0%, var(--danger) 100%);
-      box-shadow: none;
-    }
-
-    .icon-btn {
-      width: 42px;
-      padding: 0;
-      display: inline-grid;
-      place-items: center;
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    .search-row {
-      display: grid;
-      grid-template-columns: 1fr 160px auto;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    th, td {
-      border-bottom: 1px solid var(--line);
-      padding: 13px 12px;
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    th {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      background: #f6fafc;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    tbody tr {
-      transition: background .14s ease;
-    }
-
-    tbody tr:hover {
-      background: #f8fbfc;
-    }
-
-    tr:last-child td {
-      border-bottom: 0;
-    }
-
-    .num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .stock-low {
-      color: var(--warning);
-      font-weight: 700;
-    }
-
-    .cart-list {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .cart-item {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: center;
-      background: #fbfdfe;
-    }
-
-    .cart-item strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .cart-item small {
-      color: var(--muted);
-    }
-
-    .qty {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .qty button {
-      width: 32px;
-      min-height: 32px;
-      padding: 0;
-      background: #e7eff4;
-      color: var(--ink);
-      box-shadow: none;
-    }
-
-    .qty span {
-      min-width: 24px;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .totals {
-      background: linear-gradient(135deg, var(--soft) 0%, var(--soft-blue) 100%);
-      border: 1px solid #cbe7e2;
-      border-radius: 12px;
-      padding: 16px;
-      display: grid;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .total-row.grand {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--accent-dark);
-    }
+    .panel-head h2 { margin: 0; font-size: 18px; }
+    .panel-body { padding: 18px; }
+    .grid { display: grid; gap: 12px; }
+    .grid.two { grid-template-columns: 1fr 1fr; }
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 18px;
     }
 
     .stat {
-      background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
       border: 1px solid var(--line);
       border-radius: 12px;
+      background: #fff;
       padding: 14px;
     }
 
@@ -348,1139 +190,318 @@
       display: block;
       color: var(--muted);
       font-size: 12px;
-      text-transform: uppercase;
       font-weight: 700;
-      margin-bottom: 6px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
     }
 
-    .stat strong {
-      font-size: 22px;
-    }
-
-    .history {
-      max-height: 300px;
-      overflow: auto;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fff;
-    }
-
-    .empty {
-      color: var(--muted);
-      text-align: center;
-      padding: 22px 8px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-    }
-
-    .row-actions {
-      display: flex;
-      gap: 6px;
-      justify-content: flex-end;
-    }
-
-    .header-actions {
-      display: flex;
+    .stat strong { font-size: 24px; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.5fr 120px 150px 150px;
       gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .assistant-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(8, 19, 26, .42);
-      backdrop-filter: blur(8px);
-    }
-
-    .assistant-modal.open {
-      display: flex;
-    }
-
-    .assistant-card {
-      width: min(680px, 100%);
-      background: #fff;
-      border: 1px solid rgba(255, 255, 255, .65);
-      border-radius: 18px;
-      box-shadow: 0 24px 70px rgba(8, 19, 26, .28);
-      overflow: hidden;
-    }
-
-    .assistant-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 18px;
-      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
-      color: #fff;
-    }
-
-    .assistant-head p {
-      color: rgba(255, 255, 255, .76);
-      font-size: 13px;
-      margin-top: 5px;
-    }
-
-    .assistant-close {
-      width: 36px;
-      min-height: 36px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, .14);
-      box-shadow: none;
-    }
-
-    .assistant-body {
-      padding: 18px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .assistant-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-    }
-
-    .assistant-examples {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .assistant-chip {
-      min-height: 32px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #edf2f6;
-      color: var(--ink);
-      border: 1px solid #dce6ec;
-      box-shadow: none;
-      font-size: 12px;
-    }
-
-    .assistant-result {
-      min-height: 44px;
-      border: 1px solid #dce6ec;
-      border-radius: 12px;
-      background: #f8fbfc;
-      padding: 12px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .voice-assistant {
-      position: relative;
-      min-width: 132px;
-      overflow: visible;
-      isolation: isolate;
-    }
-
-    .voice-assistant::before {
-      content: '';
-      position: absolute;
-      inset: -5px;
-      z-index: -1;
-      border-radius: 16px;
-      background: rgba(15, 118, 110, .34);
-      opacity: .72;
-      animation: voicePulse 1.9s ease-out infinite;
-    }
-
-    .voice-assistant.listening {
-      background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-      box-shadow: 0 12px 28px rgba(239, 68, 68, .28);
-    }
-
-    .voice-assistant.listening::before {
-      background: rgba(239, 68, 68, .42);
-      animation-duration: 1s;
-    }
-
-    .receipt-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(8, 19, 26, .5);
-      backdrop-filter: blur(8px);
-    }
-
-    .receipt-modal.open {
-      display: flex;
-    }
-
-    .receipt-card {
-      width: min(460px, 100%);
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 24px 70px rgba(8, 19, 26, .3);
-      overflow: hidden;
-    }
-
-    .receipt-head {
-      padding: 18px;
-      color: #fff;
-      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-    .receipt-close {
-      width: 36px;
-      min-height: 36px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, .14);
-      box-shadow: none;
-    }
-
-    .receipt-body {
-      padding: 18px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .receipt-paper {
-      border: 1px dashed #c8d5dd;
-      border-radius: 12px;
-      padding: 16px;
-      background: #fbfdfe;
-      color: #172026;
-    }
-
-    .receipt-paper h3 {
-      text-align: center;
-      margin-bottom: 4px;
-    }
-
-    .receipt-meta {
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
       margin-bottom: 14px;
     }
 
-    .receipt-line {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      padding: 9px 0;
-      border-bottom: 1px solid #e7eef3;
-      font-size: 14px;
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      overflow: auto;
+      max-height: 520px;
     }
 
-    .receipt-line small {
-      color: var(--muted);
-      display: block;
-      margin-top: 3px;
-    }
-
-    .receipt-total {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding-top: 14px;
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--accent-dark);
-    }
-
-    .receipt-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .receipt-actions a {
-      min-height: 42px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    @keyframes voicePulse {
-      0% {
-        transform: scale(.94);
-        opacity: .65;
-      }
-      70% {
-        transform: scale(1.12);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1.12);
-        opacity: 0;
-      }
-    }
-
-    aside {
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th {
       position: sticky;
-      top: 18px;
+      top: 0;
+      z-index: 1;
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
     }
 
-    @media (max-width: 940px) {
-      main {
-        grid-template-columns: 1fr;
-      }
+    tr:hover td { background: #f8fafc; }
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status.abierto { color: #1e3a8a; background: #dbeafe; }
+    .status.cerrado { color: var(--green); background: #dcfce7; }
+    .status.archivado { color: #475569; background: #e2e8f0; }
+    .status.reservado { color: var(--amber); background: #fef3c7; }
 
-      aside {
-        position: static;
-      }
-
-      .toolbar {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .toolbar button {
-        width: 100%;
-      }
+    .empty { color: var(--muted); text-align: center; padding: 28px; }
+    .detail {
+      display: grid;
+      gap: 12px;
+      color: #1f2937;
+    }
+    .detail-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eef2f7;
+    }
+    .detail-row span { color: var(--muted); font-weight: 700; font-size: 12px; text-transform: uppercase; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .note {
+      padding: 12px;
+      border: 1px solid #fde68a;
+      background: #fffbeb;
+      color: #78350f;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.45;
     }
 
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+    }
     @media (max-width: 620px) {
-      header {
-        padding: 16px;
-      }
-
-      main {
-        padding: 14px;
-      }
-
-      .toolbar, .search-row, .stats {
-        grid-template-columns: 1fr;
-      }
-
-      .assistant-row {
-        grid-template-columns: 1fr;
-      }
-
-      .receipt-actions {
-        grid-template-columns: 1fr;
-      }
-
-      table {
-        font-size: 13px;
-      }
-
-      th:nth-child(3), td:nth-child(3) {
-        display: none;
-      }
+      main { padding: 14px; }
+      .grid.two, .grid.three, .stats, .toolbar { grid-template-columns: 1fr; }
+      .detail-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Mi Tienda</h1>
-      <p id="today"></p>
-    </div>
-    <div class="header-actions">
-      <button class="voice-assistant" id="assistantBtn" type="button" title="Toca y habla">🎙 Hablar</button>
-      <button class="secondary" id="resetBtn">Reiniciar datos</button>
-    </div>
-  </header>
-
-  <main>
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Inventario</h2>
-        <div class="actions">
-          <button class="secondary" id="exportBtn">Exportar CSV</button>
-        </div>
+  <section class="login" id="loginView">
+    <form class="login-card" id="loginForm">
+      <div class="login-head">
+        <h1>Expedientes Policiales</h1>
+        <p>Acceso institucional para registro y consulta documental.</p>
       </div>
-      <div class="panel-body">
-        <form class="toolbar" id="productForm">
-          <div>
-            <label for="name">Producto</label>
-            <input id="name" required placeholder="Ej. Arroz 1 kg">
-          </div>
-          <div>
-            <label for="category">Categoría</label>
-            <input id="category" placeholder="Abarrotes">
-          </div>
-          <div>
-            <label for="price">Precio S/</label>
-            <input id="price" required type="number" min="0" step="0.10" placeholder="0.00">
-          </div>
-          <div>
-            <label for="stock">Stock</label>
-            <input id="stock" required type="number" min="0" step="1" placeholder="0">
-          </div>
-          <button class="icon-btn" title="Agregar producto" aria-label="Agregar producto">+</button>
-        </form>
-
-        <div class="search-row">
-          <input id="search" placeholder="Buscar producto">
-          <select id="categoryFilter" aria-label="Filtrar por categoría">
-            <option value="">Todas las categorías</option>
-          </select>
-          <button class="secondary" id="emptyStockBtn" type="button">Lista sin stock</button>
+      <div class="login-body">
+        <div class="note">Prototipo inicial. No ingresar datos reales sensibles hasta configurar autenticación institucional y políticas de acceso.</div>
+        <div>
+          <label for="user">Usuario</label>
+          <input id="user" autocomplete="username" required placeholder="admin">
         </div>
-
-        <div class="history">
-          <table>
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Categoría</th>
-                <th class="num">Stock</th>
-                <th class="num">Precio</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="productRows"></tbody>
-          </table>
+        <div>
+          <label for="pass">Contraseña</label>
+          <input id="pass" type="password" autocomplete="current-password" required placeholder="demo2026">
         </div>
+        <button>Ingresar</button>
+        <small style="color:var(--muted)">Demo: admin / demo2026</small>
       </div>
-    </section>
+    </form>
+  </section>
 
-    <aside>
+  <section class="app" id="appView">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Sistema de Gestión y Consulta de Expedientes Policiales</h1>
+        <p>Registro, búsqueda, trazabilidad y control documental.</p>
+      </div>
+      <div class="user-box">
+        <span class="badge" id="sessionBadge">Operador</span>
+        <button class="secondary" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <main>
       <section class="panel">
         <div class="panel-head">
-          <h2>Venta</h2>
-          <button class="secondary" id="clearCartBtn">Vaciar</button>
+          <h2>Registrar expediente</h2>
         </div>
         <div class="panel-body">
-          <div class="cart-list" id="cartList"></div>
-          <div class="totals">
-            <div class="total-row"><span>Productos</span><strong id="itemCount">0</strong></div>
-            <div class="total-row grand"><span>Total</span><span id="cartTotal">S/ 0.00</span></div>
-          </div>
-          <button class="blue" id="checkoutBtn" style="width:100%">Registrar venta</button>
+          <form class="grid" id="caseForm">
+            <div class="grid two">
+              <div>
+                <label for="caseNumber">N° expediente</label>
+                <input id="caseNumber" required placeholder="EXP-2026-0001">
+              </div>
+              <div>
+                <label for="year">Año</label>
+                <input id="year" type="number" required min="1950" max="2100">
+              </div>
+            </div>
+            <div>
+              <label for="dependency">Dependencia policial</label>
+              <input id="dependency" required placeholder="Comisaría / Unidad">
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="caseType">Tipo de caso</label>
+                <select id="caseType">
+                  <option>Denuncia</option>
+                  <option>Investigación</option>
+                  <option>Parte policial</option>
+                  <option>Acta</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div>
+                <label for="status">Estado</label>
+                <select id="status">
+                  <option>Abierto</option>
+                  <option>Cerrado</option>
+                  <option>Archivado</option>
+                  <option>Reservado</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="personA">Denunciante / solicitante</label>
+                <input id="personA" placeholder="Apellidos y nombres">
+              </div>
+              <div>
+                <label for="personB">Investigado / vinculado</label>
+                <input id="personB" placeholder="Apellidos y nombres">
+              </div>
+            </div>
+            <div class="grid two">
+              <div>
+                <label for="dni">DNI / documento</label>
+                <input id="dni" placeholder="Opcional">
+              </div>
+              <div>
+                <label for="entryDate">Fecha de ingreso</label>
+                <input id="entryDate" type="date">
+              </div>
+            </div>
+            <div>
+              <label for="summary">Resumen / materia</label>
+              <textarea id="summary" placeholder="Descripción breve del expediente"></textarea>
+            </div>
+            <div>
+              <label for="notes">Observaciones</label>
+              <textarea id="notes" placeholder="Movimientos, ubicación física, folios, anexos"></textarea>
+            </div>
+            <button>Guardar expediente</button>
+          </form>
         </div>
       </section>
 
-      <section class="panel" style="margin-top:18px">
-        <div class="panel-head">
-          <h2>Resumen</h2>
+      <section>
+        <div class="stats">
+          <div class="stat"><span>Total</span><strong id="totalCases">0</strong></div>
+          <div class="stat"><span>Abiertos</span><strong id="openCases">0</strong></div>
+          <div class="stat"><span>Archivados</span><strong id="archivedCases">0</strong></div>
+          <div class="stat"><span>Reservados</span><strong id="reservedCases">0</strong></div>
         </div>
-        <div class="panel-body">
-          <div class="stats">
-            <div class="stat"><span>Ventas</span><strong id="salesCount">0</strong></div>
-            <div class="stat"><span>Ingresos</span><strong id="income">S/ 0</strong></div>
-            <div class="stat"><span>Bajo stock</span><strong id="lowStock">0</strong></div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Consulta de expedientes</h2>
+            <div class="actions">
+              <button class="secondary" id="exportBtn" type="button">Exportar CSV</button>
+              <button class="secondary" id="printBtn" type="button">Imprimir ficha</button>
+            </div>
           </div>
-          <h3 style="margin-bottom:10px">Últimas ventas</h3>
-          <div class="history">
-            <table>
-              <thead>
-                <tr>
-                  <th>Hora</th>
-                  <th>Detalle</th>
-                  <th class="num">Total</th>
-                </tr>
-              </thead>
-              <tbody id="salesRows"></tbody>
-            </table>
+          <div class="panel-body">
+            <div class="toolbar">
+              <input id="search" placeholder="Buscar por expediente, DNI, nombres o dependencia">
+              <select id="filterYear"><option value="">Todos los años</option></select>
+              <select id="filterStatus"><option value="">Todos los estados</option></select>
+              <select id="filterType"><option value="">Todos los tipos</option></select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Expediente</th>
+                    <th>Año</th>
+                    <th>Dependencia</th>
+                    <th>Personas vinculadas</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="caseRows"></tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section class="panel" style="margin-top:18px">
+          <div class="panel-head">
+            <h2>Detalle del expediente</h2>
+            <span class="badge" id="selectedBadge">Sin selección</span>
+          </div>
+          <div class="panel-body">
+            <div id="caseDetail" class="empty">Seleccione un expediente para ver la ficha completa.</div>
+          </div>
+        </section>
       </section>
-    </aside>
-  </main>
-
-  <div class="assistant-modal" id="assistantModal" aria-hidden="true">
-    <section class="assistant-card" role="dialog" aria-modal="true" aria-labelledby="assistantTitle">
-      <div class="assistant-head">
-        <div>
-          <h2 id="assistantTitle">Asistente de tienda</h2>
-          <p>Respaldo manual si Chrome no deja usar el micrófono.</p>
-        </div>
-        <button class="assistant-close" id="assistantClose" type="button" aria-label="Cerrar">x</button>
-      </div>
-      <div class="assistant-body">
-        <div class="assistant-row">
-          <input id="assistantCommand" placeholder="Ej. agrega Coca-Cola precio 6.50 stock 12 categoria bebidas">
-          <button id="assistantRun" type="button">Ejecutar</button>
-        </div>
-        <div class="assistant-examples">
-          <button class="assistant-chip" type="button" data-command="agrega Coca-Cola precio 6.50 stock 12 categoria bebidas">Agregar producto</button>
-          <button class="assistant-chip" type="button" data-command="vende 2 Coca-Cola">Vender</button>
-          <button class="assistant-chip" type="button" data-command="stock bajo">Stock bajo</button>
-          <button class="assistant-chip" type="button" data-command="resumen del dia">Resumen</button>
-        </div>
-        <div class="assistant-result" id="assistantResult">Toca el botón Hablar y di: agrega Inca Kola precio 4.50 stock 8 categoria bebidas</div>
-      </div>
-    </section>
-  </div>
-
-  <div class="receipt-modal" id="receiptModal" aria-hidden="true">
-    <section class="receipt-card" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
-      <div class="receipt-head">
-        <div>
-          <h2 id="receiptTitle">Boleta generada</h2>
-          <p>Lista para imprimir o enviar por WhatsApp.</p>
-        </div>
-        <button class="receipt-close" id="receiptClose" type="button" aria-label="Cerrar">x</button>
-      </div>
-      <div class="receipt-body">
-        <div class="receipt-paper" id="receiptPaper"></div>
-        <div class="receipt-actions">
-          <button id="receiptPrint" type="button">Imprimir</button>
-          <a id="receiptWhatsapp" target="_blank" rel="noopener">WhatsApp</a>
-        </div>
-      </div>
-    </section>
-  </div>
+    </main>
+  </section>
 
   <script>
-    const money = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
-    const dateFmt = new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' });
-    const storeKey = 'tienda.simple.v1';
+    const storeKey = 'expedientes.policiales.demo.v1';
+    const makeId = () => crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const today = new Date().toISOString().slice(0, 10);
 
-    const makeId = () => {
-      if (globalThis.crypto && globalThis.crypto.randomUUID) return globalThis.crypto.randomUUID();
-      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const starterState = {
+      cases: [
+        {
+          id: 'demo-001',
+          number: 'EXP-2026-0001',
+          year: 2026,
+          dependency: 'Comisaría Central',
+          type: 'Denuncia',
+          status: 'Abierto',
+          personA: 'Registro demostrativo',
+          personB: 'Sin datos reales',
+          dni: '',
+          entryDate: today,
+          summary: 'Expediente de ejemplo para validar búsqueda y ficha.',
+          notes: 'No utilizar datos personales reales en este prototipo.',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          history: [{ date: new Date().toISOString(), action: 'Creación de expediente demo', user: 'Sistema' }]
+        }
+      ]
     };
-
-    const starterProducts = [
-      { id: makeId(), name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25 },
-      { id: makeId(), name: 'Azúcar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18 },
-      { id: makeId(), name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12 },
-      { id: makeId(), name: 'Jabón de ropa', category: 'Limpieza', price: 3.5, stock: 20 }
-    ];
-
-    const usesSharedDatabase = location.protocol === 'http:' || location.protocol === 'https:';
-    let state = { products: starterProducts, sales: [] };
-    let cart = [];
-    let showingEmptyStock = false;
-    let recognition;
-    let isListening = false;
 
     const els = {
-      today: document.querySelector('#today'),
-      productForm: document.querySelector('#productForm'),
-      name: document.querySelector('#name'),
-      category: document.querySelector('#category'),
-      price: document.querySelector('#price'),
-      stock: document.querySelector('#stock'),
+      loginView: document.querySelector('#loginView'),
+      appView: document.querySelector('#appView'),
+      loginForm: document.querySelector('#loginForm'),
+      user: document.querySelector('#user'),
+      pass: document.querySelector('#pass'),
+      logoutBtn: document.querySelector('#logoutBtn'),
+      caseForm: document.querySelector('#caseForm'),
+      caseNumber: document.querySelector('#caseNumber'),
+      year: document.querySelector('#year'),
+      dependency: document.querySelector('#dependency'),
+      caseType: document.querySelector('#caseType'),
+      status: document.querySelector('#status'),
+      personA: document.querySelector('#personA'),
+      personB: document.querySelector('#personB'),
+      dni: document.querySelector('#dni'),
+      entryDate: document.querySelector('#entryDate'),
+      summary: document.querySelector('#summary'),
+      notes: document.querySelector('#notes'),
       search: document.querySelector('#search'),
-      categoryFilter: document.querySelector('#categoryFilter'),
-      emptyStockBtn: document.querySelector('#emptyStockBtn'),
-      productRows: document.querySelector('#productRows'),
-      cartList: document.querySelector('#cartList'),
-      itemCount: document.querySelector('#itemCount'),
-      cartTotal: document.querySelector('#cartTotal'),
-      checkoutBtn: document.querySelector('#checkoutBtn'),
-      clearCartBtn: document.querySelector('#clearCartBtn'),
-      salesCount: document.querySelector('#salesCount'),
-      income: document.querySelector('#income'),
-      lowStock: document.querySelector('#lowStock'),
-      salesRows: document.querySelector('#salesRows'),
+      filterYear: document.querySelector('#filterYear'),
+      filterStatus: document.querySelector('#filterStatus'),
+      filterType: document.querySelector('#filterType'),
+      caseRows: document.querySelector('#caseRows'),
+      caseDetail: document.querySelector('#caseDetail'),
+      selectedBadge: document.querySelector('#selectedBadge'),
+      totalCases: document.querySelector('#totalCases'),
+      openCases: document.querySelector('#openCases'),
+      archivedCases: document.querySelector('#archivedCases'),
+      reservedCases: document.querySelector('#reservedCases'),
       exportBtn: document.querySelector('#exportBtn'),
-      resetBtn: document.querySelector('#resetBtn'),
-      assistantBtn: document.querySelector('#assistantBtn'),
-      assistantModal: document.querySelector('#assistantModal'),
-      assistantClose: document.querySelector('#assistantClose'),
-      assistantCommand: document.querySelector('#assistantCommand'),
-      assistantRun: document.querySelector('#assistantRun'),
-      assistantResult: document.querySelector('#assistantResult'),
-      receiptModal: document.querySelector('#receiptModal'),
-      receiptClose: document.querySelector('#receiptClose'),
-      receiptPaper: document.querySelector('#receiptPaper'),
-      receiptPrint: document.querySelector('#receiptPrint'),
-      receiptWhatsapp: document.querySelector('#receiptWhatsapp')
+      printBtn: document.querySelector('#printBtn')
     };
 
-    async function loadState() {
-      if (usesSharedDatabase) {
-        try {
-          const response = await fetch('/api/state', { cache: 'no-store' });
-          if (response.ok) return await response.json();
-        } catch {
-          return { products: starterProducts, sales: [] };
-        }
-      }
-      const saved = localStorage.getItem(storeKey);
-      if (!saved) return { products: starterProducts, sales: [] };
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return { products: starterProducts, sales: [] };
-      }
-    }
-
-    async function saveState() {
-      if (usesSharedDatabase) {
-        try {
-          await fetch('/api/state', {
-            method: 'PUT',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify(state)
-          });
-        } catch {
-          alert('No se pudo guardar en la base compartida. Revisa que el servidor siga encendido.');
-        }
-        return;
-      }
-      localStorage.setItem(storeKey, JSON.stringify(state));
-    }
-
-    function render() {
-      els.today.textContent = dateFmt.format(new Date());
-      renderCategories();
-      renderProducts();
-      renderCart();
-      renderSummary();
-      saveState();
-    }
-
-    function renderCategories() {
-      const current = els.categoryFilter.value;
-      const categories = [...new Set(state.products.map(p => p.category).filter(Boolean))].sort();
-      els.categoryFilter.innerHTML = '<option value="">Todas las categorías</option>' +
-        categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
-      els.categoryFilter.value = categories.includes(current) ? current : '';
-    }
-
-    function renderProducts() {
-      const term = els.search.value.trim().toLowerCase();
-      const category = els.categoryFilter.value;
-      const products = state.products
-        .filter(p => !term || p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term))
-        .filter(p => !category || p.category === category)
-        .filter(p => !showingEmptyStock || p.stock === 0)
-        .sort((a, b) => a.name.localeCompare(b.name));
-      els.emptyStockBtn.textContent = showingEmptyStock ? 'Ver todos' : 'Lista sin stock';
-
-      if (!products.length) {
-        const message = showingEmptyStock ? 'No hay productos sin stock.' : 'No hay productos para mostrar.';
-        els.productRows.innerHTML = `<tr><td class="empty" colspan="5">${message}</td></tr>`;
-        return;
-      }
-
-      els.productRows.innerHTML = products.map(product => `
-        <tr>
-          <td><strong>${escapeHtml(product.name)}</strong></td>
-          <td>${escapeHtml(product.category || 'Sin categoría')}</td>
-          <td class="num ${product.stock <= 5 ? 'stock-low' : ''}">${product.stock}</td>
-          <td class="num">${money.format(product.price)}</td>
-          <td class="num">
-            <div class="row-actions">
-              <button class="icon-btn" title="Agregar a venta" aria-label="Agregar ${escapeHtml(product.name)}" onclick="addToCart('${product.id}')">+</button>
-              <button class="icon-btn danger" title="Borrar producto" aria-label="Borrar ${escapeHtml(product.name)}" onclick="deleteProduct('${product.id}')">x</button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderCart() {
-      if (!cart.length) {
-        els.cartList.innerHTML = '<div class="empty">Agrega productos desde el inventario.</div>';
-      } else {
-        els.cartList.innerHTML = cart.map(item => {
-          const product = state.products.find(p => p.id === item.id);
-          if (!product) return '';
-          return `
-            <div class="cart-item">
-              <div>
-                <strong>${escapeHtml(product.name)}</strong>
-                <small>${money.format(product.price)} x ${item.qty}</small>
-              </div>
-              <div class="qty">
-                <button onclick="changeQty('${item.id}', -1)" aria-label="Quitar uno">-</button>
-                <span>${item.qty}</span>
-                <button onclick="changeQty('${item.id}', 1)" aria-label="Agregar uno">+</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      const count = cart.reduce((sum, item) => sum + item.qty, 0);
-      const total = cart.reduce((sum, item) => {
-        const product = state.products.find(p => p.id === item.id);
-        return sum + (product ? product.price * item.qty : 0);
-      }, 0);
-      els.itemCount.textContent = count;
-      els.cartTotal.textContent = money.format(total);
-      els.checkoutBtn.disabled = cart.length === 0;
-    }
-
-    function renderSummary() {
-      const income = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-      els.salesCount.textContent = state.sales.length;
-      els.income.textContent = money.format(income);
-      els.lowStock.textContent = state.products.filter(p => p.stock <= 5).length;
-
-      if (!state.sales.length) {
-        els.salesRows.innerHTML = '<tr><td class="empty" colspan="3">Aún no hay ventas registradas.</td></tr>';
-        return;
-      }
-
-      els.salesRows.innerHTML = state.sales.slice(0, 10).map(sale => `
-        <tr>
-          <td>${new Date(sale.date).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}</td>
-          <td>${escapeHtml(sale.items.map(i => `${i.name} x${i.qty}`).join(', '))}</td>
-          <td class="num">${money.format(sale.total)}</td>
-        </tr>
-      `).join('');
-    }
-
-    function addToCart(id) {
-      const product = state.products.find(p => p.id === id);
-      if (!product || product.stock <= 0) return;
-      const item = cart.find(i => i.id === id);
-      const qtyInCart = item ? item.qty : 0;
-      if (qtyInCart >= product.stock) return;
-      if (item) item.qty += 1;
-      else cart.push({ id, qty: 1 });
-      renderCart();
-    }
-
-    function changeQty(id, delta) {
-      const item = cart.find(i => i.id === id);
-      const product = state.products.find(p => p.id === id);
-      if (!item || !product) return;
-      item.qty = Math.max(0, Math.min(product.stock, item.qty + delta));
-      cart = cart.filter(i => i.qty > 0);
-      renderCart();
-    }
-
-    function deleteProduct(id) {
-      const product = state.products.find(p => p.id === id);
-      if (!product) return;
-      if (!confirm(`¿Borrar "${product.name}" del inventario?`)) return;
-      state.products = state.products.filter(p => p.id !== id);
-      cart = cart.filter(item => item.id !== id);
-      render();
-    }
-
-    function receiptNumber(sale) {
-      return `B-${String(sale.id || '').slice(-6).toUpperCase()}`;
-    }
-
-    function receiptText(sale) {
-      const date = new Date(sale.date);
-      const lines = [
-        'MI TIENDA',
-        `Boleta: ${receiptNumber(sale)}`,
-        `Fecha: ${date.toLocaleString('es-PE')}`,
-        '',
-        'Detalle:'
-      ];
-
-      sale.items.forEach(item => {
-        lines.push(`${item.qty} x ${item.name} - ${money.format(item.price * item.qty)}`);
-      });
-
-      lines.push('', `TOTAL: ${money.format(sale.total)}`, '', 'Gracias por su compra.');
-      return lines.join('\n');
-    }
-
-    function receiptHtml(sale) {
-      const date = new Date(sale.date);
-      const rows = sale.items.map(item => `
-        <div class="receipt-line">
-          <div>
-            <strong>${escapeHtml(item.name)}</strong>
-            <small>${item.qty} x ${money.format(item.price)}</small>
-          </div>
-          <strong>${money.format(item.price * item.qty)}</strong>
-        </div>
-      `).join('');
-
-      return `
-        <h3>Mi Tienda</h3>
-        <div class="receipt-meta">
-          <div>Boleta ${receiptNumber(sale)}</div>
-          <div>${date.toLocaleString('es-PE')}</div>
-        </div>
-        ${rows}
-        <div class="receipt-total">
-          <span>Total</span>
-          <span>${money.format(sale.total)}</span>
-        </div>
-      `;
-    }
-
-    function showReceipt(sale) {
-      els.receiptPaper.innerHTML = receiptHtml(sale);
-      els.receiptWhatsapp.href = `https://wa.me/?text=${encodeURIComponent(receiptText(sale))}`;
-      els.receiptModal.classList.add('open');
-      els.receiptModal.setAttribute('aria-hidden', 'false');
-    }
-
-    function closeReceipt() {
-      els.receiptModal.classList.remove('open');
-      els.receiptModal.setAttribute('aria-hidden', 'true');
-    }
-
-    function printReceipt() {
-      const printWindow = window.open('', '_blank', 'width=420,height=720');
-      if (!printWindow) {
-        window.print();
-        return;
-      }
-
-      printWindow.document.write(`
-        <!doctype html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Boleta</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 24px; color: #172026; }
-            .receipt-paper { max-width: 320px; margin: 0 auto; }
-            h3 { text-align: center; margin: 0 0 4px; }
-            .receipt-meta { color: #657481; font-size: 12px; text-align: center; margin-bottom: 14px; }
-            .receipt-line { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 9px 0; border-bottom: 1px solid #dbe4ea; font-size: 14px; }
-            small { color: #657481; display: block; margin-top: 3px; }
-            .receipt-total { display: flex; justify-content: space-between; padding-top: 14px; font-size: 20px; font-weight: 800; }
-          </style>
-        </head>
-        <body><div class="receipt-paper">${els.receiptPaper.innerHTML}</div></body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
-
-    function normalizeText(value) {
-      return String(value || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
-    }
-
-    function parseMoneyValue(value) {
-      const number = Number(String(value || '').replace(',', '.'));
-      return Number.isFinite(number) ? number : null;
-    }
-
-    function findProductByName(name) {
-      const target = normalizeText(name);
-      if (!target) return null;
-      return state.products.find(product => normalizeText(product.name) === target)
-        || state.products.find(product => normalizeText(product.name).includes(target))
-        || state.products.find(product => target.includes(normalizeText(product.name)));
-    }
-
-    function openAssistant() {
-      els.assistantModal.classList.add('open');
-      els.assistantModal.setAttribute('aria-hidden', 'false');
-      els.assistantCommand.focus();
-    }
-
-    function closeAssistant() {
-      els.assistantModal.classList.remove('open');
-      els.assistantModal.setAttribute('aria-hidden', 'true');
-    }
-
-    function setAssistantResult(message, isError = false) {
-      els.assistantResult.textContent = message;
-      els.assistantResult.style.color = isError ? 'var(--danger)' : 'var(--muted)';
-      return message;
-    }
-
-    function speakAssistant(message) {
-      if (!('speechSynthesis' in window)) return;
-      const clean = String(message || '').replace(/S\/\s*/g, 'soles ');
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = 'es-PE';
-      utterance.rate = .98;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function setListening(active) {
-      isListening = active;
-      els.assistantBtn.classList.toggle('listening', active);
-      els.assistantBtn.textContent = active ? '🔴 Escuchando' : '🎙 Hablar';
-    }
-
-    function getSpeechRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return null;
-      if (!recognition) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'es-PE';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-        recognition.onstart = () => {
-          setListening(true);
-          setAssistantResult('Te escucho. Di: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas');
-        };
-        recognition.onresult = event => {
-          const transcript = event.results[0][0].transcript;
-          els.assistantCommand.value = transcript;
-          setAssistantResult(`Escuché: "${transcript}"`);
-          const message = runAssistantCommand(transcript);
-          if (message) speakAssistant(message);
-        };
-        recognition.onerror = () => {
-          const message = setAssistantResult('No pude escuchar bien. Toca el botón y repite el comando.', true);
-          speakAssistant(message);
-        };
-        recognition.onend = () => setListening(false);
-      }
-      return recognition;
-    }
-
-    function startVoiceAssistant() {
-      const speech = getSpeechRecognition();
-      if (!speech) {
-        openAssistant();
-        const message = setAssistantResult('Tu navegador no activó el micrófono aquí. Puedes escribir el comando en esta caja.', true);
-        speakAssistant(message);
-        return;
-      }
-
-      if (isListening) {
-        speech.stop();
-        return;
-      }
-
-      try {
-        speech.start();
-      } catch {
-        speech.stop();
-        setListening(false);
-      }
-    }
-
-    function extractCommandParts(command) {
-      const priceMatch = command.match(/(?:precio|vale|cuesta|a|s\/)\s*(\d+(?:[.,]\d+)?)/i);
-      const stockMatch = command.match(/(?:stock|cantidad|unidades?|uds?|con)\s*(\d+)/i);
-      const categoryMatch = command.match(/categor(?:ia|ía)\s+(.+)$/i);
-      return {
-        price: priceMatch ? parseMoneyValue(priceMatch[1]) : null,
-        stock: stockMatch ? Number(stockMatch[1]) : null,
-        category: categoryMatch ? categoryMatch[1].trim() : 'General'
-      };
-    }
-
-    function cleanProductName(command) {
-      return command
-        .replace(/^(agrega|agregar|crea|crear|nuevo|nueva)\s*/i, '')
-        .replace(/^producto\s*/i, '')
-        .replace(/(?:precio|vale|cuesta|a|s\/)\s*\d+(?:[.,]\d+)?/ig, '')
-        .replace(/(?:stock|cantidad|unidades?|uds?|con)\s*\d+/ig, '')
-        .replace(/categor(?:ia|ía)\s+.+$/i, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function runAddProduct(command) {
-      const parts = extractCommandParts(command);
-      const name = cleanProductName(command);
-      if (!name || parts.price === null || parts.stock === null) {
-        return setAssistantResult('Para agregar usa: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas', true);
-      }
-
-      const product = {
-        id: makeId(),
-        name,
-        category: parts.category || 'General',
-        price: parts.price,
-        stock: parts.stock
-      };
-      state.products.push(product);
-      showingEmptyStock = false;
-      render();
-      return setAssistantResult(`Listo: agregué ${product.name} con stock ${product.stock} a ${money.format(product.price)}.`);
-    }
-
-    function runSale(command) {
-      const qtyMatch = command.match(/\b(\d+)\b/);
-      const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
-      const name = command
-        .replace(/^(vende|vender|venta|registra venta|registrar venta)\s*/i, '')
-        .replace(/\b\d+\b/, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      const product = findProductByName(name);
-
-      if (!product) {
-        return setAssistantResult(`No encontré el producto "${name}". Prueba con: vende 1 arroz`, true);
-      }
-
-      if (qty <= 0 || product.stock < qty) {
-        return setAssistantResult(`No hay stock suficiente de ${product.name}. Stock actual: ${product.stock}.`, true);
-      }
-
-      product.stock -= qty;
-      const saleItem = { id: product.id, name: product.name, qty, price: product.price };
-      const total = saleItem.price * saleItem.qty;
-      const sale = { id: makeId(), date: new Date().toISOString(), items: [saleItem], total };
-      state.sales.unshift(sale);
-      cart = cart.filter(item => item.id !== product.id);
-      render();
-      showReceipt(sale);
-      return setAssistantResult(`Venta registrada: ${qty} x ${product.name}. Total ${money.format(total)}.`);
-    }
-
-    function runSearch(command) {
-      const term = command.replace(/^(busca|buscar|encuentra|ver)\s*/i, '').trim();
-      els.search.value = term;
-      showingEmptyStock = false;
-      renderProducts();
-      return setAssistantResult(term ? `Buscando productos con "${term}".` : 'Escribe: busca arroz');
-    }
-
-    function runLowStock() {
-      const products = state.products.filter(product => product.stock <= 5).sort((a, b) => a.stock - b.stock);
-      if (!products.length) {
-        return setAssistantResult('Todo bien: no tienes productos con stock bajo.');
-      }
-      return setAssistantResult(`Stock bajo: ${products.map(product => `${product.name} (${product.stock})`).join(', ')}.`);
-    }
-
-    function runEmptyStock() {
-      showingEmptyStock = true;
-      renderProducts();
-      const count = state.products.filter(product => product.stock === 0).length;
-      return setAssistantResult(count ? `Mostrando ${count} producto(s) sin stock.` : 'No hay productos sin stock.');
-    }
-
-    function runDaySummary() {
-      const today = new Date().toDateString();
-      const sales = state.sales.filter(sale => new Date(sale.date).toDateString() === today);
-      const income = sales.reduce((sum, sale) => sum + sale.total, 0);
-      const units = sales.flatMap(sale => sale.items).reduce((sum, item) => sum + item.qty, 0);
-      return setAssistantResult(`Hoy tienes ${sales.length} venta(s), ${units} producto(s) vendidos y ${money.format(income)} en ingresos.`);
-    }
-
-    function runAssistantCommand(spokenCommand) {
-      const command = String(spokenCommand || els.assistantCommand.value).trim();
-      const normalized = normalizeText(command);
-      if (!command) {
-        return setAssistantResult('Escribe una orden. Ejemplo: vende 2 Coca-Cola', true);
-      }
-
-      if (/^(agrega|agregar|crea|crear|nuevo|nueva)\b/.test(normalized)) {
-        return runAddProduct(command);
-      } else if (/^(vende|vender|venta|registra venta|registrar venta)\b/.test(normalized)) {
-        return runSale(command);
-      } else if (/^(busca|buscar|encuentra|ver)\b/.test(normalized)) {
-        return runSearch(command);
-      } else if (normalized.includes('sin stock') || normalized.includes('stock cero')) {
-        return runEmptyStock();
-      } else if (normalized.includes('stock bajo') || normalized.includes('bajo stock')) {
-        return runLowStock();
-      } else if (normalized.includes('resumen') || normalized.includes('vendido hoy') || normalized.includes('ventas hoy')) {
-        return runDaySummary();
-      } else {
-        return setAssistantResult('No entendí. Prueba: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas, vende 2 Coca-Cola, stock bajo.', true);
-      }
-    }
-
-    els.productForm.addEventListener('submit', event => {
-      event.preventDefault();
-      const product = {
-        id: makeId(),
-        name: els.name.value.trim(),
-        category: els.category.value.trim() || 'General',
-        price: Number(els.price.value),
-        stock: Number(els.stock.value)
-      };
-      if (!product.name || product.price < 0 || product.stock < 0) return;
-      state.products.push(product);
-      els.productForm.reset();
-      render();
-    });
-
-    els.checkoutBtn.addEventListener('click', () => {
-      if (!cart.length) return;
-      const items = cart.map(item => {
-        const product = state.products.find(p => p.id === item.id);
-        return { id: item.id, name: product.name, qty: item.qty, price: product.price };
-      });
-      const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-      for (const item of cart) {
-        const product = state.products.find(p => p.id === item.id);
-        product.stock -= item.qty;
-      }
-      const sale = { id: makeId(), date: new Date().toISOString(), items, total };
-      state.sales.unshift(sale);
-      cart = [];
-      render();
-      showReceipt(sale);
-    });
-
-    els.clearCartBtn.addEventListener('click', () => {
-      cart = [];
-      renderCart();
-    });
-
-    els.search.addEventListener('input', renderProducts);
-    els.categoryFilter.addEventListener('change', renderProducts);
-    els.emptyStockBtn.addEventListener('click', () => {
-      showingEmptyStock = !showingEmptyStock;
-      renderProducts();
-    });
-
-    els.exportBtn.addEventListener('click', () => {
-      const rows = [['Producto', 'Categoría', 'Stock', 'Precio']];
-      state.products.forEach(p => rows.push([p.name, p.category, p.stock, p.price]));
-      const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'inventario-tienda.csv';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    });
-
-    els.resetBtn.addEventListener('click', () => {
-      if (!confirm('¿Reiniciar productos y ventas?')) return;
-      state = { products: starterProducts.map(p => ({ ...p, id: makeId() })), sales: [] };
-      cart = [];
-      render();
-    });
-
-    els.assistantBtn.addEventListener('click', startVoiceAssistant);
-    els.assistantClose.addEventListener('click', closeAssistant);
-    els.assistantRun.addEventListener('click', () => {
-      const message = runAssistantCommand();
-      if (message) speakAssistant(message);
-    });
-    els.assistantCommand.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        const message = runAssistantCommand();
-        if (message) speakAssistant(message);
-      }
-      if (event.key === 'Escape') closeAssistant();
-    });
-    els.assistantModal.addEventListener('click', event => {
-      if (event.target === els.assistantModal) closeAssistant();
-    });
-    document.querySelectorAll('[data-command]').forEach(button => {
-      button.addEventListener('click', () => {
-        els.assistantCommand.value = button.dataset.command;
-        const message = runAssistantCommand();
-        if (message) speakAssistant(message);
-      });
-    });
-
-    els.receiptClose.addEventListener('click', closeReceipt);
-    els.receiptPrint.addEventListener('click', printReceipt);
-    els.receiptModal.addEventListener('click', event => {
-      if (event.target === els.receiptModal) closeReceipt();
-    });
+    let state = starterState;
+    let selectedId = null;
 
     function escapeHtml(value) {
-      return String(value)
+      return String(value ?? '')
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
@@ -1488,12 +509,208 @@
         .replaceAll("'", '&#039;');
     }
 
-    async function init() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-      }
-      state = await loadState();
+    function normalize(value) {
+      return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    async function loadState() {
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (response.ok) return await response.json();
+      } catch {}
+      const saved = localStorage.getItem(storeKey);
+      return saved ? JSON.parse(saved) : starterState;
+    }
+
+    async function saveState() {
+      localStorage.setItem(storeKey, JSON.stringify(state));
+      try {
+        await fetch('/api/state', {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+      } catch {}
+    }
+
+    function showApp() {
+      els.loginView.style.display = 'none';
+      els.appView.style.display = 'block';
       render();
+    }
+
+    function requireSession() {
+      if (sessionStorage.getItem('expedientes.session') === 'ok') showApp();
+    }
+
+    function filteredCases() {
+      const term = normalize(els.search.value);
+      return state.cases
+        .filter(item => !term || normalize([item.number, item.dni, item.personA, item.personB, item.dependency, item.summary].join(' ')).includes(term))
+        .filter(item => !els.filterYear.value || String(item.year) === els.filterYear.value)
+        .filter(item => !els.filterStatus.value || item.status === els.filterStatus.value)
+        .filter(item => !els.filterType.value || item.type === els.filterType.value)
+        .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+    }
+
+    function renderFilters() {
+      const year = els.filterYear.value;
+      const status = els.filterStatus.value;
+      const type = els.filterType.value;
+      const years = [...new Set(state.cases.map(item => item.year).filter(Boolean))].sort((a, b) => b - a);
+      const statuses = [...new Set(state.cases.map(item => item.status).filter(Boolean))].sort();
+      const types = [...new Set(state.cases.map(item => item.type).filter(Boolean))].sort();
+      els.filterYear.innerHTML = '<option value="">Todos los años</option>' + years.map(y => `<option>${y}</option>`).join('');
+      els.filterStatus.innerHTML = '<option value="">Todos los estados</option>' + statuses.map(s => `<option>${escapeHtml(s)}</option>`).join('');
+      els.filterType.innerHTML = '<option value="">Todos los tipos</option>' + types.map(t => `<option>${escapeHtml(t)}</option>`).join('');
+      els.filterYear.value = years.includes(Number(year)) ? year : '';
+      els.filterStatus.value = statuses.includes(status) ? status : '';
+      els.filterType.value = types.includes(type) ? type : '';
+    }
+
+    function renderStats() {
+      els.totalCases.textContent = state.cases.length;
+      els.openCases.textContent = state.cases.filter(item => item.status === 'Abierto').length;
+      els.archivedCases.textContent = state.cases.filter(item => item.status === 'Archivado').length;
+      els.reservedCases.textContent = state.cases.filter(item => item.status === 'Reservado').length;
+    }
+
+    function renderRows() {
+      const cases = filteredCases();
+      if (!cases.length) {
+        els.caseRows.innerHTML = '<tr><td class="empty" colspan="5">No hay expedientes para mostrar.</td></tr>';
+        return;
+      }
+      els.caseRows.innerHTML = cases.map(item => `
+        <tr onclick="selectCase('${item.id}')">
+          <td><strong>${escapeHtml(item.number)}</strong><br><small>${escapeHtml(item.type)}</small></td>
+          <td>${escapeHtml(item.year)}</td>
+          <td>${escapeHtml(item.dependency)}</td>
+          <td>${escapeHtml(item.personA || 'No registrado')}<br><small>${escapeHtml(item.personB || '')}</small></td>
+          <td><span class="status ${normalize(item.status)}">${escapeHtml(item.status)}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function selectCase(id) {
+      selectedId = id;
+      renderDetail();
+    }
+    window.selectCase = selectCase;
+
+    function renderDetail() {
+      const item = state.cases.find(record => record.id === selectedId);
+      if (!item) {
+        els.selectedBadge.textContent = 'Sin selección';
+        els.caseDetail.className = 'empty';
+        els.caseDetail.textContent = 'Seleccione un expediente para ver la ficha completa.';
+        return;
+      }
+      els.selectedBadge.textContent = item.number;
+      els.caseDetail.className = 'detail';
+      els.caseDetail.innerHTML = `
+        ${detailRow('Expediente', item.number)}
+        ${detailRow('Año', item.year)}
+        ${detailRow('Dependencia', item.dependency)}
+        ${detailRow('Tipo', item.type)}
+        ${detailRow('Estado', item.status)}
+        ${detailRow('Fecha ingreso', item.entryDate || 'No registrada')}
+        ${detailRow('Denunciante', item.personA || 'No registrado')}
+        ${detailRow('Vinculado', item.personB || 'No registrado')}
+        ${detailRow('Documento', item.dni || 'No registrado')}
+        ${detailRow('Resumen', item.summary || 'Sin resumen')}
+        ${detailRow('Observaciones', item.notes || 'Sin observaciones')}
+        ${detailRow('Última actualización', new Date(item.updatedAt).toLocaleString('es-PE'))}
+      `;
+    }
+
+    function detailRow(label, value) {
+      return `<div class="detail-row"><span>${escapeHtml(label)}</span><div>${escapeHtml(value)}</div></div>`;
+    }
+
+    function render() {
+      renderFilters();
+      renderStats();
+      renderRows();
+      renderDetail();
+      saveState();
+    }
+
+    els.loginForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (els.user.value.trim() === 'admin' && els.pass.value === 'demo2026') {
+        sessionStorage.setItem('expedientes.session', 'ok');
+        showApp();
+        return;
+      }
+      alert('Credenciales no válidas.');
+    });
+
+    els.logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('expedientes.session');
+      location.reload();
+    });
+
+    els.caseForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const now = new Date().toISOString();
+      const record = {
+        id: makeId(),
+        number: els.caseNumber.value.trim(),
+        year: Number(els.year.value),
+        dependency: els.dependency.value.trim(),
+        type: els.caseType.value,
+        status: els.status.value,
+        personA: els.personA.value.trim(),
+        personB: els.personB.value.trim(),
+        dni: els.dni.value.trim(),
+        entryDate: els.entryDate.value || today,
+        summary: els.summary.value.trim(),
+        notes: els.notes.value.trim(),
+        createdAt: now,
+        updatedAt: now,
+        history: [{ date: now, action: 'Registro inicial', user: 'Operador demo' }]
+      };
+      state.cases.unshift(record);
+      selectedId = record.id;
+      els.caseForm.reset();
+      els.year.value = new Date().getFullYear();
+      els.entryDate.value = today;
+      render();
+    });
+
+    [els.search, els.filterYear, els.filterStatus, els.filterType].forEach(control => {
+      control.addEventListener('input', () => {
+        renderRows();
+      });
+      control.addEventListener('change', () => {
+        renderRows();
+      });
+    });
+
+    els.exportBtn.addEventListener('click', () => {
+      const rows = [['Expediente','Año','Dependencia','Tipo','Estado','Denunciante','Vinculado','DNI','Fecha','Resumen']];
+      filteredCases().forEach(item => rows.push([item.number,item.year,item.dependency,item.type,item.status,item.personA,item.personB,item.dni,item.entryDate,item.summary]));
+      const csv = rows.map(row => row.map(value => `"${String(value ?? '').replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'expedientes-policiales.csv';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    els.printBtn.addEventListener('click', () => {
+      if (!selectedId) return alert('Seleccione un expediente.');
+      window.print();
+    });
+
+    async function init() {
+      els.year.value = new Date().getFullYear();
+      els.entryDate.value = today;
+      state = await loadState();
+      if (!state.cases) state = starterState;
+      requireSession();
     }
 
     init();

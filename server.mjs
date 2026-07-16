@@ -7,9 +7,10 @@ import pg from 'pg';
 const { Pool } = pg;
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(__dirname, 'public');
-const localDbPath = join(__dirname, 'tienda-db.json');
+const localDbPath = join(__dirname, 'expedientes-db.json');
 const port = Number(process.env.PORT || 8080);
 const databaseUrl = process.env.DATABASE_URL;
+const stateId = 'expedientes-policiales';
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -19,13 +20,25 @@ const types = {
 };
 
 const starterState = {
-  products: [
-    { id: 'p-arroz', name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25 },
-    { id: 'p-azucar', name: 'Azucar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18 },
-    { id: 'p-aceite', name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12 },
-    { id: 'p-jabon', name: 'Jabon de ropa', category: 'Limpieza', price: 3.5, stock: 20 }
-  ],
-  sales: []
+  cases: [
+    {
+      id: 'demo-001',
+      number: 'EXP-2026-0001',
+      year: 2026,
+      dependency: 'Comisaria Central',
+      type: 'Denuncia',
+      status: 'Abierto',
+      personA: 'Registro demostrativo',
+      personB: 'Sin datos reales',
+      dni: '',
+      entryDate: '2026-07-16',
+      summary: 'Expediente de ejemplo para validar busqueda y ficha.',
+      notes: 'No utilizar datos personales reales en este prototipo.',
+      createdAt: '2026-07-16T00:00:00.000Z',
+      updatedAt: '2026-07-16T00:00:00.000Z',
+      history: [{ date: '2026-07-16T00:00:00.000Z', action: 'Creacion de expediente demo', user: 'Sistema' }]
+    }
+  ]
 };
 
 const pool = databaseUrl
@@ -48,13 +61,13 @@ async function initDb() {
     `insert into app_state (id, data)
      values ($1, $2::jsonb)
      on conflict (id) do nothing`,
-    ['tienda', JSON.stringify(starterState)]
+    [stateId, JSON.stringify(starterState)]
   );
 }
 
 async function readDb() {
   if (pool) {
-    const result = await pool.query('select data from app_state where id = $1', ['tienda']);
+    const result = await pool.query('select data from app_state where id = $1', [stateId]);
     return result.rows[0]?.data || starterState;
   }
 
@@ -73,7 +86,7 @@ async function writeDb(state) {
        values ($1, $2::jsonb, now())
        on conflict (id)
        do update set data = excluded.data, updated_at = now()`,
-      ['tienda', JSON.stringify(state)]
+      [stateId, JSON.stringify(state)]
     );
     return;
   }
@@ -138,5 +151,5 @@ const server = http.createServer(async (req, res) => {
 await initDb();
 
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Tienda online escuchando en puerto ${port}`);
+  console.log(`Expedientes policiales escuchando en puerto ${port}`);
 });

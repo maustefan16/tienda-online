@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: tienda-online
+    name: expedientes-policiales
     runtime: node
     plan: free
     buildCommand: npm install
