@@ -391,122 +391,6 @@
       flex-wrap: wrap;
     }
 
-    .assistant-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(8, 19, 26, .42);
-      backdrop-filter: blur(8px);
-    }
-
-    .assistant-modal.open {
-      display: flex;
-    }
-
-    .assistant-card {
-      width: min(680px, 100%);
-      background: #fff;
-      border: 1px solid rgba(255, 255, 255, .65);
-      border-radius: 18px;
-      box-shadow: 0 24px 70px rgba(8, 19, 26, .28);
-      overflow: hidden;
-    }
-
-    .assistant-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 18px;
-      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
-      color: #fff;
-    }
-
-    .assistant-head p {
-      color: rgba(255, 255, 255, .76);
-      font-size: 13px;
-      margin-top: 5px;
-    }
-
-    .assistant-close {
-      width: 36px;
-      min-height: 36px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, .14);
-      box-shadow: none;
-    }
-
-    .assistant-body {
-      padding: 18px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .assistant-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-    }
-
-    .assistant-examples {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .assistant-chip {
-      min-height: 32px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #edf2f6;
-      color: var(--ink);
-      border: 1px solid #dce6ec;
-      box-shadow: none;
-      font-size: 12px;
-    }
-
-    .assistant-result {
-      min-height: 44px;
-      border: 1px solid #dce6ec;
-      border-radius: 12px;
-      background: #f8fbfc;
-      padding: 12px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .voice-assistant {
-      position: relative;
-      min-width: 132px;
-      overflow: visible;
-      isolation: isolate;
-    }
-
-    .voice-assistant::before {
-      content: '';
-      position: absolute;
-      inset: -5px;
-      z-index: -1;
-      border-radius: 16px;
-      background: rgba(15, 118, 110, .34);
-      opacity: .72;
-      animation: voicePulse 1.9s ease-out infinite;
-    }
-
-    .voice-assistant.listening {
-      background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-      box-shadow: 0 12px 28px rgba(239, 68, 68, .28);
-    }
-
-    .voice-assistant.listening::before {
-      background: rgba(239, 68, 68, .42);
-      animation-duration: 1s;
-    }
-
     .receipt-modal {
       position: fixed;
       inset: 0;
@@ -617,21 +501,6 @@
       text-decoration: none;
     }
 
-    @keyframes voicePulse {
-      0% {
-        transform: scale(.94);
-        opacity: .65;
-      }
-      70% {
-        transform: scale(1.12);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1.12);
-        opacity: 0;
-      }
-    }
-
     aside {
       position: sticky;
       top: 18px;
@@ -668,10 +537,6 @@
         grid-template-columns: 1fr;
       }
 
-      .assistant-row {
-        grid-template-columns: 1fr;
-      }
-
       .receipt-actions {
         grid-template-columns: 1fr;
       }
@@ -693,7 +558,6 @@
       <p id="today"></p>
     </div>
     <div class="header-actions">
-      <button class="voice-assistant" id="assistantBtn" type="button" title="Toca y habla">🎙 Hablar</button>
       <button class="secondary" id="resetBtn">Reiniciar datos</button>
     </div>
   </header>
@@ -796,30 +660,6 @@
     </aside>
   </main>
 
-  <div class="assistant-modal" id="assistantModal" aria-hidden="true">
-    <section class="assistant-card" role="dialog" aria-modal="true" aria-labelledby="assistantTitle">
-      <div class="assistant-head">
-        <div>
-          <h2 id="assistantTitle">Asistente de tienda</h2>
-          <p>Respaldo manual si Chrome no deja usar el micrófono.</p>
-        </div>
-        <button class="assistant-close" id="assistantClose" type="button" aria-label="Cerrar">x</button>
-      </div>
-      <div class="assistant-body">
-        <div class="assistant-row">
-          <input id="assistantCommand" placeholder="Ej. agrega Coca-Cola precio 6.50 stock 12 categoria bebidas">
-          <button id="assistantRun" type="button">Ejecutar</button>
-        </div>
-        <div class="assistant-examples">
-          <button class="assistant-chip" type="button" data-command="agrega Coca-Cola precio 6.50 stock 12 categoria bebidas">Agregar producto</button>
-          <button class="assistant-chip" type="button" data-command="vende 2 Coca-Cola">Vender</button>
-          <button class="assistant-chip" type="button" data-command="stock bajo">Stock bajo</button>
-          <button class="assistant-chip" type="button" data-command="resumen del dia">Resumen</button>
-        </div>
-        <div class="assistant-result" id="assistantResult">Toca el botón Hablar y di: agrega Inca Kola precio 4.50 stock 8 categoria bebidas</div>
-      </div>
-    </section>
-  </div>
 
   <div class="receipt-modal" id="receiptModal" aria-hidden="true">
     <section class="receipt-card" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
@@ -861,8 +701,6 @@
     let state = { products: starterProducts, sales: [] };
     let cart = [];
     let showingEmptyStock = false;
-    let recognition;
-    let isListening = false;
 
     const els = {
       today: document.querySelector('#today'),
@@ -886,12 +724,6 @@
       salesRows: document.querySelector('#salesRows'),
       exportBtn: document.querySelector('#exportBtn'),
       resetBtn: document.querySelector('#resetBtn'),
-      assistantBtn: document.querySelector('#assistantBtn'),
-      assistantModal: document.querySelector('#assistantModal'),
-      assistantClose: document.querySelector('#assistantClose'),
-      assistantCommand: document.querySelector('#assistantCommand'),
-      assistantRun: document.querySelector('#assistantRun'),
-      assistantResult: document.querySelector('#assistantResult'),
       receiptModal: document.querySelector('#receiptModal'),
       receiptClose: document.querySelector('#receiptClose'),
       receiptPaper: document.querySelector('#receiptPaper'),
@@ -1155,235 +987,6 @@
       printWindow.print();
     }
 
-    function normalizeText(value) {
-      return String(value || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
-    }
-
-    function parseMoneyValue(value) {
-      const number = Number(String(value || '').replace(',', '.'));
-      return Number.isFinite(number) ? number : null;
-    }
-
-    function findProductByName(name) {
-      const target = normalizeText(name);
-      if (!target) return null;
-      return state.products.find(product => normalizeText(product.name) === target)
-        || state.products.find(product => normalizeText(product.name).includes(target))
-        || state.products.find(product => target.includes(normalizeText(product.name)));
-    }
-
-    function openAssistant() {
-      els.assistantModal.classList.add('open');
-      els.assistantModal.setAttribute('aria-hidden', 'false');
-      els.assistantCommand.focus();
-    }
-
-    function closeAssistant() {
-      els.assistantModal.classList.remove('open');
-      els.assistantModal.setAttribute('aria-hidden', 'true');
-    }
-
-    function setAssistantResult(message, isError = false) {
-      els.assistantResult.textContent = message;
-      els.assistantResult.style.color = isError ? 'var(--danger)' : 'var(--muted)';
-      return message;
-    }
-
-    function speakAssistant(message) {
-      if (!('speechSynthesis' in window)) return;
-      const clean = String(message || '').replace(/S\/\s*/g, 'soles ');
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = 'es-PE';
-      utterance.rate = .98;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function setListening(active) {
-      isListening = active;
-      els.assistantBtn.classList.toggle('listening', active);
-      els.assistantBtn.textContent = active ? '🔴 Escuchando' : '🎙 Hablar';
-    }
-
-    function getSpeechRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return null;
-      if (!recognition) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'es-PE';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-        recognition.onstart = () => {
-          setListening(true);
-          setAssistantResult('Te escucho. Di: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas');
-        };
-        recognition.onresult = event => {
-          const transcript = event.results[0][0].transcript;
-          els.assistantCommand.value = transcript;
-          setAssistantResult(`Escuché: "${transcript}"`);
-          const message = runAssistantCommand(transcript);
-          if (message) speakAssistant(message);
-        };
-        recognition.onerror = () => {
-          const message = setAssistantResult('No pude escuchar bien. Toca el botón y repite el comando.', true);
-          speakAssistant(message);
-        };
-        recognition.onend = () => setListening(false);
-      }
-      return recognition;
-    }
-
-    function startVoiceAssistant() {
-      const speech = getSpeechRecognition();
-      if (!speech) {
-        openAssistant();
-        const message = setAssistantResult('Tu navegador no activó el micrófono aquí. Puedes escribir el comando en esta caja.', true);
-        speakAssistant(message);
-        return;
-      }
-
-      if (isListening) {
-        speech.stop();
-        return;
-      }
-
-      try {
-        speech.start();
-      } catch {
-        speech.stop();
-        setListening(false);
-      }
-    }
-
-    function extractCommandParts(command) {
-      const priceMatch = command.match(/(?:precio|vale|cuesta|a|s\/)\s*(\d+(?:[.,]\d+)?)/i);
-      const stockMatch = command.match(/(?:stock|cantidad|unidades?|uds?|con)\s*(\d+)/i);
-      const categoryMatch = command.match(/categor(?:ia|ía)\s+(.+)$/i);
-      return {
-        price: priceMatch ? parseMoneyValue(priceMatch[1]) : null,
-        stock: stockMatch ? Number(stockMatch[1]) : null,
-        category: categoryMatch ? categoryMatch[1].trim() : 'General'
-      };
-    }
-
-    function cleanProductName(command) {
-      return command
-        .replace(/^(agrega|agregar|crea|crear|nuevo|nueva)\s*/i, '')
-        .replace(/^producto\s*/i, '')
-        .replace(/(?:precio|vale|cuesta|a|s\/)\s*\d+(?:[.,]\d+)?/ig, '')
-        .replace(/(?:stock|cantidad|unidades?|uds?|con)\s*\d+/ig, '')
-        .replace(/categor(?:ia|ía)\s+.+$/i, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function runAddProduct(command) {
-      const parts = extractCommandParts(command);
-      const name = cleanProductName(command);
-      if (!name || parts.price === null || parts.stock === null) {
-        return setAssistantResult('Para agregar usa: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas', true);
-      }
-
-      const product = {
-        id: makeId(),
-        name,
-        category: parts.category || 'General',
-        price: parts.price,
-        stock: parts.stock
-      };
-      state.products.push(product);
-      showingEmptyStock = false;
-      render();
-      return setAssistantResult(`Listo: agregué ${product.name} con stock ${product.stock} a ${money.format(product.price)}.`);
-    }
-
-    function runSale(command) {
-      const qtyMatch = command.match(/\b(\d+)\b/);
-      const qty = qtyMatch ? Number(qtyMatch[1]) : 1;
-      const name = command
-        .replace(/^(vende|vender|venta|registra venta|registrar venta)\s*/i, '')
-        .replace(/\b\d+\b/, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      const product = findProductByName(name);
-
-      if (!product) {
-        return setAssistantResult(`No encontré el producto "${name}". Prueba con: vende 1 arroz`, true);
-      }
-
-      if (qty <= 0 || product.stock < qty) {
-        return setAssistantResult(`No hay stock suficiente de ${product.name}. Stock actual: ${product.stock}.`, true);
-      }
-
-      product.stock -= qty;
-      const saleItem = { id: product.id, name: product.name, qty, price: product.price };
-      const total = saleItem.price * saleItem.qty;
-      const sale = { id: makeId(), date: new Date().toISOString(), items: [saleItem], total };
-      state.sales.unshift(sale);
-      cart = cart.filter(item => item.id !== product.id);
-      render();
-      showReceipt(sale);
-      return setAssistantResult(`Venta registrada: ${qty} x ${product.name}. Total ${money.format(total)}.`);
-    }
-
-    function runSearch(command) {
-      const term = command.replace(/^(busca|buscar|encuentra|ver)\s*/i, '').trim();
-      els.search.value = term;
-      showingEmptyStock = false;
-      renderProducts();
-      return setAssistantResult(term ? `Buscando productos con "${term}".` : 'Escribe: busca arroz');
-    }
-
-    function runLowStock() {
-      const products = state.products.filter(product => product.stock <= 5).sort((a, b) => a.stock - b.stock);
-      if (!products.length) {
-        return setAssistantResult('Todo bien: no tienes productos con stock bajo.');
-      }
-      return setAssistantResult(`Stock bajo: ${products.map(product => `${product.name} (${product.stock})`).join(', ')}.`);
-    }
-
-    function runEmptyStock() {
-      showingEmptyStock = true;
-      renderProducts();
-      const count = state.products.filter(product => product.stock === 0).length;
-      return setAssistantResult(count ? `Mostrando ${count} producto(s) sin stock.` : 'No hay productos sin stock.');
-    }
-
-    function runDaySummary() {
-      const today = new Date().toDateString();
-      const sales = state.sales.filter(sale => new Date(sale.date).toDateString() === today);
-      const income = sales.reduce((sum, sale) => sum + sale.total, 0);
-      const units = sales.flatMap(sale => sale.items).reduce((sum, item) => sum + item.qty, 0);
-      return setAssistantResult(`Hoy tienes ${sales.length} venta(s), ${units} producto(s) vendidos y ${money.format(income)} en ingresos.`);
-    }
-
-    function runAssistantCommand(spokenCommand) {
-      const command = String(spokenCommand || els.assistantCommand.value).trim();
-      const normalized = normalizeText(command);
-      if (!command) {
-        return setAssistantResult('Escribe una orden. Ejemplo: vende 2 Coca-Cola', true);
-      }
-
-      if (/^(agrega|agregar|crea|crear|nuevo|nueva)\b/.test(normalized)) {
-        return runAddProduct(command);
-      } else if (/^(vende|vender|venta|registra venta|registrar venta)\b/.test(normalized)) {
-        return runSale(command);
-      } else if (/^(busca|buscar|encuentra|ver)\b/.test(normalized)) {
-        return runSearch(command);
-      } else if (normalized.includes('sin stock') || normalized.includes('stock cero')) {
-        return runEmptyStock();
-      } else if (normalized.includes('stock bajo') || normalized.includes('bajo stock')) {
-        return runLowStock();
-      } else if (normalized.includes('resumen') || normalized.includes('vendido hoy') || normalized.includes('ventas hoy')) {
-        return runDaySummary();
-      } else {
-        return setAssistantResult('No entendí. Prueba: agrega Coca-Cola precio 6.50 stock 12 categoria bebidas, vende 2 Coca-Cola, stock bajo.', true);
-      }
-    }
 
     els.productForm.addEventListener('submit', event => {
       event.preventDefault();
@@ -1449,29 +1052,6 @@
       render();
     });
 
-    els.assistantBtn.addEventListener('click', startVoiceAssistant);
-    els.assistantClose.addEventListener('click', closeAssistant);
-    els.assistantRun.addEventListener('click', () => {
-      const message = runAssistantCommand();
-      if (message) speakAssistant(message);
-    });
-    els.assistantCommand.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        const message = runAssistantCommand();
-        if (message) speakAssistant(message);
-      }
-      if (event.key === 'Escape') closeAssistant();
-    });
-    els.assistantModal.addEventListener('click', event => {
-      if (event.target === els.assistantModal) closeAssistant();
-    });
-    document.querySelectorAll('[data-command]').forEach(button => {
-      button.addEventListener('click', () => {
-        els.assistantCommand.value = button.dataset.command;
-        const message = runAssistantCommand();
-        if (message) speakAssistant(message);
-      });
-    });
 
     els.receiptClose.addEventListener('click', closeReceipt);
     els.receiptPrint.addEventListener('click', printReceipt);
