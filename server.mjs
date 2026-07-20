@@ -7,10 +7,9 @@ import pg from 'pg';
 const { Pool } = pg;
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(__dirname, 'public');
-const localDbPath = join(__dirname, 'expedientes-db.json');
+const localDbPath = join(__dirname, 'tienda-db.json');
 const port = Number(process.env.PORT || 8080);
 const databaseUrl = process.env.DATABASE_URL;
-const stateId = 'expedientes-policiales';
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -20,33 +19,13 @@ const types = {
 };
 
 const starterState = {
-  cases: [
-    {
-      id: 'demo-001',
-      regDepinc: '001',
-      htSgd: 'PNP-DEMO-2026',
-      fecha: '2026-07-16',
-      regionUnidad: 'DIRNIC-PNP / DIVINCRI / DEPINC',
-      gradoPnp: 'GRADO PNP',
-      apellidosNombres: 'Registro demostrativo',
-      casoBanda: 'Expediente de ejemplo para validar busqueda y ficha.',
-      propuesta: 'Accion distinguida',
-      oficioUniasjur: '',
-      informe: '',
-      dictamen: '',
-      observacionesDictamen: 'Registro demo',
-      oficioDepincCios: '',
-      oficioCiosDepinc: '',
-      observacionesEstimar: 'No utilizar datos personales reales en este prototipo.',
-      actaPronunciamiento: '',
-      pronunciamiento: '',
-      estado: 'En tramite',
-      responsableTecnico: 'Sistema',
-      createdAt: '2026-07-16T00:00:00.000Z',
-      updatedAt: '2026-07-16T00:00:00.000Z',
-      history: [{ date: '2026-07-16T00:00:00.000Z', action: 'Creacion de expediente demo', user: 'Sistema' }]
-    }
-  ]
+  products: [
+    { id: 'p-arroz', name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25 },
+    { id: 'p-azucar', name: 'Azucar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18 },
+    { id: 'p-aceite', name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12 },
+    { id: 'p-jabon', name: 'Jabon de ropa', category: 'Limpieza', price: 3.5, stock: 20 }
+  ],
+  sales: []
 };
 
 const pool = databaseUrl
@@ -69,13 +48,13 @@ async function initDb() {
     `insert into app_state (id, data)
      values ($1, $2::jsonb)
      on conflict (id) do nothing`,
-    [stateId, JSON.stringify(starterState)]
+    ['tienda', JSON.stringify(starterState)]
   );
 }
 
 async function readDb() {
   if (pool) {
-    const result = await pool.query('select data from app_state where id = $1', [stateId]);
+    const result = await pool.query('select data from app_state where id = $1', ['tienda']);
     return result.rows[0]?.data || starterState;
   }
 
@@ -94,7 +73,7 @@ async function writeDb(state) {
        values ($1, $2::jsonb, now())
        on conflict (id)
        do update set data = excluded.data, updated_at = now()`,
-      [stateId, JSON.stringify(state)]
+      ['tienda', JSON.stringify(state)]
     );
     return;
   }
@@ -159,5 +138,5 @@ const server = http.createServer(async (req, res) => {
 await initDb();
 
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Expedientes policiales escuchando en puerto ${port}`);
+  console.log(`Tienda online escuchando en puerto ${port}`);
 });

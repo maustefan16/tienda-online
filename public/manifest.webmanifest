@@ -1,12 +1,12 @@
 {
-  "name": "Sistema de Expedientes Policiales",
-  "short_name": "Expedientes",
-  "description": "Registro y consulta institucional de expedientes policiales.",
+  "name": "Sistema de Tienda",
+  "short_name": "Tienda",
+  "description": "Inventario, ventas y stock para la tienda.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#eef2f6",
-  "theme_color": "#0f172a",
+  "background_color": "#f4f6f8",
+  "theme_color": "#102027",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'expedientes-pwa-v1';
+const CACHE_NAME = 'tienda-pwa-v1';
 const APP_SHELL = [
   '/',
   '/index.html',
