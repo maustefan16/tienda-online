@@ -1,6 +1,4 @@
-import pg from 'pg';
-
-const { Pool } = pg;
+const { Pool } = require('pg');
 
 const starterState = {
   products: [
@@ -49,7 +47,7 @@ async function initDb() {
   initialized = true;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     await initDb();
 
@@ -78,4 +76,4 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message || 'Server error' });
   }
-}
+};
