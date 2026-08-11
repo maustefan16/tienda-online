@@ -736,9 +736,7 @@
         try {
           const response = await fetch('/api/state', { cache: 'no-store' });
           if (response.ok) return await response.json();
-        } catch {
-          return { products: starterProducts, sales: [] };
-        }
+        } catch {}
       }
       const saved = localStorage.getItem(storeKey);
       if (!saved) return { products: starterProducts, sales: [] };
@@ -750,19 +748,18 @@
     }
 
     async function saveState() {
+      localStorage.setItem(storeKey, JSON.stringify(state));
       if (usesSharedDatabase) {
         try {
-          await fetch('/api/state', {
+          const response = await fetch('/api/state', {
             method: 'PUT',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(state)
           });
-        } catch {
-          alert('No se pudo guardar en la base compartida. Revisa que el servidor siga encendido.');
-        }
+          if (!response.ok) throw new Error('Database unavailable');
+        } catch {}
         return;
       }
-      localStorage.setItem(storeKey, JSON.stringify(state));
     }
 
     function render() {
