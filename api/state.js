@@ -2,10 +2,10 @@ const { Pool } = require('pg');
 
 const starterState = {
   products: [
-    { id: 'p-arroz', name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25 },
-    { id: 'p-azucar', name: 'Azucar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18 },
-    { id: 'p-aceite', name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12 },
-    { id: 'p-jabon', name: 'Jabon de ropa', category: 'Limpieza', price: 3.5, stock: 20 }
+    { id: 'p-arroz', name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25, barcode: '7750001000013' },
+    { id: 'p-azucar', name: 'Azucar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18, barcode: '7750001000020' },
+    { id: 'p-aceite', name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12, barcode: '7750001000037' },
+    { id: 'p-jabon', name: 'Jabon de ropa', category: 'Limpieza', price: 3.5, stock: 20, barcode: '7750001000044' }
   ],
   sales: []
 };

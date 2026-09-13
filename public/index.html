@@ -113,7 +113,7 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) 150px 120px 116px 42px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
       align-items: end;
       margin-bottom: 16px;
@@ -121,6 +121,18 @@
       border: 1px solid #e7eef3;
       border-radius: 12px;
       background: #f8fbfc;
+    }
+
+    .toolbar .wide {
+      grid-column: span 2;
+    }
+
+    .toolbar .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     label {
@@ -211,7 +223,7 @@
 
     .search-row {
       display: grid;
-      grid-template-columns: 1fr 160px auto;
+      grid-template-columns: 1fr 160px auto auto;
       gap: 10px;
       margin-bottom: 14px;
     }
@@ -391,6 +403,72 @@
       flex-wrap: wrap;
     }
 
+    .scanner-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(8, 19, 26, .56);
+      backdrop-filter: blur(8px);
+    }
+
+    .scanner-modal.open {
+      display: flex;
+    }
+
+    .scanner-card {
+      width: min(520px, 100%);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(8, 19, 26, .34);
+      overflow: hidden;
+    }
+
+    .scanner-head {
+      padding: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .scanner-close {
+      width: 36px;
+      min-height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .14);
+      box-shadow: none;
+    }
+
+    .scanner-body {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .scanner-video {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+      background: #102027;
+      object-fit: cover;
+    }
+
+    .scanner-result {
+      min-height: 46px;
+      border: 1px solid #dce6ec;
+      border-radius: 12px;
+      background: #f8fbfc;
+      padding: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
     .receipt-modal {
       position: fixed;
       inset: 0;
@@ -519,8 +597,8 @@
         grid-template-columns: 1fr 1fr;
       }
 
-      .toolbar button {
-        width: 100%;
+      .toolbar .wide, .toolbar .form-actions {
+        grid-column: 1 / -1;
       }
     }
 
@@ -572,7 +650,7 @@
       </div>
       <div class="panel-body">
         <form class="toolbar" id="productForm">
-          <div>
+          <div class="wide">
             <label for="name">Producto</label>
             <input id="name" required placeholder="Ej. Arroz 1 kg">
           </div>
@@ -588,7 +666,14 @@
             <label for="stock">Stock</label>
             <input id="stock" required type="number" min="0" step="1" placeholder="0">
           </div>
-          <button class="icon-btn" title="Agregar producto" aria-label="Agregar producto">+</button>
+          <div class="wide">
+            <label for="barcode">Código de barras</label>
+            <input id="barcode" inputmode="numeric" autocomplete="off" placeholder="Escanea o escribe el código">
+          </div>
+          <div class="form-actions">
+            <button class="secondary" id="scanRegisterBtn" type="button">Escanear código</button>
+            <button class="icon-btn" title="Agregar producto" aria-label="Agregar producto">+</button>
+          </div>
         </form>
 
         <div class="search-row">
@@ -596,6 +681,7 @@
           <select id="categoryFilter" aria-label="Filtrar por categoría">
             <option value="">Todas las categorías</option>
           </select>
+          <button class="blue" id="scanSaleBtn" type="button">Escanear venta</button>
           <button class="secondary" id="emptyStockBtn" type="button">Lista sin stock</button>
         </div>
 
@@ -660,6 +746,24 @@
     </aside>
   </main>
 
+  <div class="scanner-modal" id="scannerModal" aria-hidden="true">
+    <section class="scanner-card" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
+      <div class="scanner-head">
+        <div>
+          <h2 id="scannerTitle">Escanear código</h2>
+          <p>Apunta la cámara al código de barras del producto.</p>
+        </div>
+        <button class="scanner-close" id="scannerClose" type="button" aria-label="Cerrar">x</button>
+      </div>
+      <div class="scanner-body">
+        <video class="scanner-video" id="scannerVideo" muted playsinline></video>
+        <div class="scanner-result" id="scannerResult">Preparando cámara...</div>
+        <div class="actions">
+          <button class="secondary" id="scannerRetry" type="button">Escanear otra vez</button>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <div class="receipt-modal" id="receiptModal" aria-hidden="true">
     <section class="receipt-card" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
@@ -691,16 +795,21 @@
     };
 
     const starterProducts = [
-      { id: makeId(), name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25 },
-      { id: makeId(), name: 'Azúcar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18 },
-      { id: makeId(), name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12 },
-      { id: makeId(), name: 'Jabón de ropa', category: 'Limpieza', price: 3.5, stock: 20 }
+      { id: makeId(), name: 'Arroz 1 kg', category: 'Abarrotes', price: 4.8, stock: 25, barcode: '7750001000013' },
+      { id: makeId(), name: 'Azúcar 1 kg', category: 'Abarrotes', price: 4.2, stock: 18, barcode: '7750001000020' },
+      { id: makeId(), name: 'Aceite 900 ml', category: 'Cocina', price: 8.9, stock: 12, barcode: '7750001000037' },
+      { id: makeId(), name: 'Jabón de ropa', category: 'Limpieza', price: 3.5, stock: 20, barcode: '7750001000044' }
     ];
 
     const usesSharedDatabase = location.protocol === 'http:' || location.protocol === 'https:';
     let state = { products: starterProducts, sales: [] };
     let cart = [];
     let showingEmptyStock = false;
+    let scannerMode = 'sale';
+    let scannerStream = null;
+    let scannerDetector = null;
+    let scannerActive = false;
+    let scannerFrame = 0;
 
     const els = {
       today: document.querySelector('#today'),
@@ -709,6 +818,9 @@
       category: document.querySelector('#category'),
       price: document.querySelector('#price'),
       stock: document.querySelector('#stock'),
+      barcode: document.querySelector('#barcode'),
+      scanRegisterBtn: document.querySelector('#scanRegisterBtn'),
+      scanSaleBtn: document.querySelector('#scanSaleBtn'),
       search: document.querySelector('#search'),
       categoryFilter: document.querySelector('#categoryFilter'),
       emptyStockBtn: document.querySelector('#emptyStockBtn'),
@@ -724,6 +836,12 @@
       salesRows: document.querySelector('#salesRows'),
       exportBtn: document.querySelector('#exportBtn'),
       resetBtn: document.querySelector('#resetBtn'),
+      scannerModal: document.querySelector('#scannerModal'),
+      scannerClose: document.querySelector('#scannerClose'),
+      scannerTitle: document.querySelector('#scannerTitle'),
+      scannerVideo: document.querySelector('#scannerVideo'),
+      scannerResult: document.querySelector('#scannerResult'),
+      scannerRetry: document.querySelector('#scannerRetry'),
       receiptModal: document.querySelector('#receiptModal'),
       receiptClose: document.querySelector('#receiptClose'),
       receiptPaper: document.querySelector('#receiptPaper'),
@@ -731,19 +849,40 @@
       receiptWhatsapp: document.querySelector('#receiptWhatsapp')
     };
 
+    function normalizeBarcode(value) {
+      return String(value || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+    }
+
+    function normalizeState(rawState) {
+      const source = rawState && Array.isArray(rawState.products) ? rawState.products : starterProducts;
+      return {
+        products: source.map(product => ({
+          ...product,
+          barcode: normalizeBarcode(product.barcode)
+        })),
+        sales: rawState && Array.isArray(rawState.sales) ? rawState.sales : []
+      };
+    }
+
+    function findProductByBarcode(code) {
+      const target = normalizeBarcode(code);
+      if (!target) return null;
+      return state.products.find(product => normalizeBarcode(product.barcode) === target) || null;
+    }
+
     async function loadState() {
       if (usesSharedDatabase) {
         try {
           const response = await fetch('/api/state', { cache: 'no-store' });
-          if (response.ok) return await response.json();
+          if (response.ok) return normalizeState(await response.json());
         } catch {}
       }
       const saved = localStorage.getItem(storeKey);
-      if (!saved) return { products: starterProducts, sales: [] };
+      if (!saved) return normalizeState({ products: starterProducts, sales: [] });
       try {
-        return JSON.parse(saved);
+        return normalizeState(JSON.parse(saved));
       } catch {
-        return { products: starterProducts, sales: [] };
+        return normalizeState({ products: starterProducts, sales: [] });
       }
     }
 
@@ -783,7 +922,7 @@
       const term = els.search.value.trim().toLowerCase();
       const category = els.categoryFilter.value;
       const products = state.products
-        .filter(p => !term || p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term))
+        .filter(p => !term || p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term) || normalizeBarcode(p.barcode).toLowerCase().includes(term))
         .filter(p => !category || p.category === category)
         .filter(p => !showingEmptyStock || p.stock === 0)
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -797,7 +936,7 @@
 
       els.productRows.innerHTML = products.map(product => `
         <tr>
-          <td><strong>${escapeHtml(product.name)}</strong></td>
+          <td><strong>${escapeHtml(product.name)}</strong>${product.barcode ? `<br><small>${escapeHtml(product.barcode)}</small>` : ''}</td>
           <td>${escapeHtml(product.category || 'Sin categoría')}</td>
           <td class="num ${product.stock <= 5 ? 'stock-low' : ''}">${product.stock}</td>
           <td class="num">${money.format(product.price)}</td>
@@ -984,15 +1123,122 @@
       printWindow.print();
     }
 
+    function setScannerResult(message, isError = false) {
+      els.scannerResult.textContent = message;
+      els.scannerResult.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+    }
+
+    function stopScannerCamera() {
+      scannerActive = false;
+      cancelAnimationFrame(scannerFrame);
+      if (scannerStream) {
+        scannerStream.getTracks().forEach(track => track.stop());
+      }
+      scannerStream = null;
+      els.scannerVideo.srcObject = null;
+    }
+
+    function closeScanner() {
+      stopScannerCamera();
+      els.scannerModal.classList.remove('open');
+      els.scannerModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function handleScannedBarcode(rawCode) {
+      const code = normalizeBarcode(rawCode);
+      if (!code) return;
+      stopScannerCamera();
+
+      if (scannerMode === 'register') {
+        els.barcode.value = code;
+        setScannerResult(`Código detectado: ${code}. Completa nombre, precio y stock para registrar el producto.`);
+        els.name.focus();
+        return;
+      }
+
+      const product = findProductByBarcode(code);
+      if (!product) {
+        els.barcode.value = code;
+        setScannerResult(`Código ${code} no está registrado. Lo dejé en el formulario para que agregues el producto.`, true);
+        els.name.focus();
+        return;
+      }
+
+      if (product.stock <= 0) {
+        setScannerResult(`${product.name}: ${money.format(product.price)}. No se agregó porque no tiene stock.`, true);
+        return;
+      }
+
+      els.search.value = product.name;
+      showingEmptyStock = false;
+      addToCart(product.id);
+      renderProducts();
+      setScannerResult(`${product.name}: ${money.format(product.price)}. Agregado a la venta.`);
+    }
+
+    async function scanLoop() {
+      if (!scannerActive || !scannerDetector) return;
+      try {
+        const codes = await scannerDetector.detect(els.scannerVideo);
+        if (codes.length) {
+          handleScannedBarcode(codes[0].rawValue);
+          return;
+        }
+      } catch {}
+      scannerFrame = requestAnimationFrame(scanLoop);
+    }
+
+    async function openScanner(mode) {
+      scannerMode = mode;
+      stopScannerCamera();
+      els.scannerTitle.textContent = mode === 'register' ? 'Escanear para registrar' : 'Escanear producto';
+      els.scannerModal.classList.add('open');
+      els.scannerModal.setAttribute('aria-hidden', 'false');
+      setScannerResult('Preparando cámara...');
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setScannerResult('Este navegador no permite abrir la cámara. Escribe el código manualmente.', true);
+        return;
+      }
+
+      if (!('BarcodeDetector' in window)) {
+        setScannerResult('Este navegador no tiene lector de códigos integrado. Escribe el código manualmente o prueba en Chrome Android.', true);
+        return;
+      }
+
+      try {
+        const preferredFormats = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'codabar', 'qr_code'];
+        const supportedFormats = BarcodeDetector.getSupportedFormats ? await BarcodeDetector.getSupportedFormats() : preferredFormats;
+        const formats = preferredFormats.filter(format => supportedFormats.includes(format));
+        scannerDetector = formats.length ? new BarcodeDetector({ formats }) : new BarcodeDetector();
+        scannerStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        els.scannerVideo.srcObject = scannerStream;
+        await els.scannerVideo.play();
+        scannerActive = true;
+        setScannerResult('Apunta al código de barras. Cuando lo detecte, mostrará el precio.');
+        scanLoop();
+      } catch {
+        setScannerResult('No se pudo abrir la cámara. Revisa el permiso de cámara o escribe el código manualmente.', true);
+      }
+    }
 
     els.productForm.addEventListener('submit', event => {
       event.preventDefault();
+      const barcode = normalizeBarcode(els.barcode.value);
+      if (barcode && state.products.some(product => normalizeBarcode(product.barcode) === barcode)) {
+        alert('Ese código de barras ya está registrado en otro producto.');
+        return;
+      }
       const product = {
         id: makeId(),
         name: els.name.value.trim(),
         category: els.category.value.trim() || 'General',
         price: Number(els.price.value),
-        stock: Number(els.stock.value)
+        stock: Number(els.stock.value),
+        barcode
       };
       if (!product.name || product.price < 0 || product.stock < 0) return;
       state.products.push(product);
@@ -1031,8 +1277,8 @@
     });
 
     els.exportBtn.addEventListener('click', () => {
-      const rows = [['Producto', 'Categoría', 'Stock', 'Precio']];
-      state.products.forEach(p => rows.push([p.name, p.category, p.stock, p.price]));
+      const rows = [['Producto', 'Categoría', 'Stock', 'Precio', 'Código de barras']];
+      state.products.forEach(p => rows.push([p.name, p.category, p.stock, p.price, p.barcode || '']));
       const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       const link = document.createElement('a');
@@ -1044,11 +1290,18 @@
 
     els.resetBtn.addEventListener('click', () => {
       if (!confirm('¿Reiniciar productos y ventas?')) return;
-      state = { products: starterProducts.map(p => ({ ...p, id: makeId() })), sales: [] };
+      state = normalizeState({ products: starterProducts.map(p => ({ ...p, id: makeId() })), sales: [] });
       cart = [];
       render();
     });
 
+    els.scanRegisterBtn.addEventListener('click', () => openScanner('register'));
+    els.scanSaleBtn.addEventListener('click', () => openScanner('sale'));
+    els.scannerClose.addEventListener('click', closeScanner);
+    els.scannerRetry.addEventListener('click', () => openScanner(scannerMode));
+    els.scannerModal.addEventListener('click', event => {
+      if (event.target === els.scannerModal) closeScanner();
+    });
 
     els.receiptClose.addEventListener('click', closeReceipt);
     els.receiptPrint.addEventListener('click', printReceipt);
