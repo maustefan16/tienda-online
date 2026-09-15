@@ -798,31 +798,6 @@
         </div>
       </section>
 
-      <section class="panel" style="margin-top:18px">
-        <div class="panel-head">
-          <h2>Resumen</h2>
-        </div>
-        <div class="panel-body">
-          <div class="stats">
-            <div class="stat"><span>Ventas</span><strong id="salesCount">0</strong></div>
-            <div class="stat"><span>Ingresos</span><strong id="income">S/ 0</strong></div>
-            <div class="stat"><span>Bajo stock</span><strong id="lowStock">0</strong></div>
-          </div>
-          <h3 style="margin-bottom:10px">Últimas ventas</h3>
-          <div class="history">
-            <table>
-              <thead>
-                <tr>
-                  <th>Hora</th>
-                  <th>Detalle</th>
-                  <th class="num">Total</th>
-                </tr>
-              </thead>
-              <tbody id="salesRows"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
     </aside>
   </main>
 
@@ -929,10 +904,6 @@
       cartTotal: document.querySelector('#cartTotal'),
       checkoutBtn: document.querySelector('#checkoutBtn'),
       clearCartBtn: document.querySelector('#clearCartBtn'),
-      salesCount: document.querySelector('#salesCount'),
-      income: document.querySelector('#income'),
-      lowStock: document.querySelector('#lowStock'),
-      salesRows: document.querySelector('#salesRows'),
       exportBtn: document.querySelector('#exportBtn'),
       resetBtn: document.querySelector('#resetBtn'),
       scannerModal: document.querySelector('#scannerModal'),
@@ -1036,7 +1007,6 @@
       renderCategories();
       renderProducts();
       renderCart();
-      renderSummary();
       return saved;
     }
 
@@ -1155,26 +1125,6 @@
           </div>
         `;
       }).join('');
-    }
-
-    function renderSummary() {
-      const income = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-      els.salesCount.textContent = state.sales.length;
-      els.income.textContent = money.format(income);
-      els.lowStock.textContent = state.products.filter(p => p.stock <= 5).length;
-
-      if (!state.sales.length) {
-        els.salesRows.innerHTML = '<tr><td class="empty" colspan="3">Aún no hay ventas registradas.</td></tr>';
-        return;
-      }
-
-      els.salesRows.innerHTML = state.sales.slice(0, 10).map(sale => `
-        <tr>
-          <td>${new Date(sale.date).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}</td>
-          <td>${escapeHtml(sale.items.map(i => `${i.name} x${i.qty}`).join(', '))}</td>
-          <td class="num">${money.format(sale.total)}</td>
-        </tr>
-      `).join('');
     }
 
     function addToCart(id) {
