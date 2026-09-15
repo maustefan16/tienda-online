@@ -1348,7 +1348,7 @@
       const code = normalizeBarcode(rawCode);
       if (!code) return;
       const now = Date.now();
-      if (code === scannerLastCode && now - scannerLastAt < 1800) return;
+      if (code === scannerLastCode && now - scannerLastAt < 650) return;
       scannerLastCode = code;
       scannerLastAt = now;
 
@@ -1386,7 +1386,6 @@
         const codes = await scannerDetector.detect(els.scannerVideo);
         if (codes.length) {
           handleScannedBarcode(codes[0].rawValue);
-          return;
         }
       } catch {}
       scannerFrame = requestAnimationFrame(scanLoop);
@@ -1395,6 +1394,7 @@
     async function openScanner(mode) {
       scannerMode = mode;
       stopScannerCamera();
+      if (mode === 'sale') cart = [];
       els.scannerTitle.textContent = mode === 'register' ? 'Escanear para registrar' : 'Escanear producto';
       els.scannerSalePanel.style.display = mode === 'sale' ? 'grid' : 'none';
       hideScannerAddOption();
