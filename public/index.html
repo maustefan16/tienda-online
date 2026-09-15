@@ -420,21 +420,30 @@
     }
 
     .scanner-card {
-      width: min(520px, 100%);
+      width: min(560px, 100%);
+      max-height: min(92vh, 860px);
       background: #fff;
-      border-radius: 18px;
+      border-radius: 8px;
       box-shadow: 0 24px 70px rgba(8, 19, 26, .34);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .scanner-head {
-      padding: 18px;
+      padding: 14px 16px;
       color: #fff;
-      background: linear-gradient(135deg, #102027 0%, #0f766e 100%);
+      background: #102027;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 14px;
+    }
+
+    .scanner-head p {
+      margin-top: 4px;
+      color: rgba(255, 255, 255, .74);
+      font-size: 13px;
     }
 
     .scanner-close {
@@ -446,27 +455,94 @@
     }
 
     .scanner-body {
-      padding: 18px;
+      padding: 0;
       display: grid;
-      gap: 12px;
+      gap: 0;
+      overflow: auto;
     }
 
     .scanner-video {
       width: 100%;
-      aspect-ratio: 4 / 3;
-      border-radius: 14px;
+      height: min(48vh, 390px);
       background: #102027;
       object-fit: cover;
     }
 
     .scanner-result {
-      min-height: 46px;
-      border: 1px solid #dce6ec;
-      border-radius: 12px;
+      min-height: 44px;
+      border-bottom: 1px solid var(--line);
       background: #f8fbfc;
-      padding: 12px;
+      padding: 12px 16px;
       color: var(--muted);
       line-height: 1.45;
+    }
+
+    .scanner-sale-panel {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      background: #fff;
+    }
+
+    .scanner-total {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .scanner-total span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .scanner-total strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 28px;
+      color: var(--accent-dark);
+      line-height: 1;
+    }
+
+    .scanner-mini-list {
+      display: grid;
+      gap: 8px;
+      min-height: 96px;
+      max-height: 190px;
+      overflow: auto;
+    }
+
+    .scanner-mini-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfdfe;
+    }
+
+    .scanner-mini-item small {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .scanner-mini-item strong:last-child {
+      color: var(--accent-dark);
+    }
+
+    .scanner-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .scanner-actions .wide {
+      grid-column: 1 / -1;
     }
 
     .receipt-modal {
@@ -758,8 +834,23 @@
       <div class="scanner-body">
         <video class="scanner-video" id="scannerVideo" muted playsinline></video>
         <div class="scanner-result" id="scannerResult">Preparando cámara...</div>
-        <div class="actions">
-          <button class="secondary" id="scannerRetry" type="button">Escanear otra vez</button>
+        <div class="scanner-sale-panel" id="scannerSalePanel">
+          <div class="scanner-total">
+            <div>
+              <h3>Artículos</h3>
+              <span id="scannerItemCount">0 items</span>
+            </div>
+            <div>
+              <span>Total</span>
+              <strong id="scannerTotal">S/ 0.00</strong>
+            </div>
+          </div>
+          <div class="scanner-mini-list" id="scannerCartList"></div>
+          <div class="scanner-actions">
+            <button class="secondary" id="scannerAddProduct" type="button" hidden>Agregar producto</button>
+            <button class="secondary" id="scannerRetry" type="button">Reactivar cámara</button>
+            <button class="blue wide" id="scannerCheckout" type="button">Registrar venta</button>
+          </div>
         </div>
       </div>
     </section>
@@ -810,6 +901,8 @@
     let scannerDetector = null;
     let scannerActive = false;
     let scannerFrame = 0;
+    let scannerLastCode = '';
+    let scannerLastAt = 0;
 
     const els = {
       today: document.querySelector('#today'),
@@ -842,6 +935,12 @@
       scannerVideo: document.querySelector('#scannerVideo'),
       scannerResult: document.querySelector('#scannerResult'),
       scannerRetry: document.querySelector('#scannerRetry'),
+      scannerSalePanel: document.querySelector('#scannerSalePanel'),
+      scannerCartList: document.querySelector('#scannerCartList'),
+      scannerItemCount: document.querySelector('#scannerItemCount'),
+      scannerTotal: document.querySelector('#scannerTotal'),
+      scannerAddProduct: document.querySelector('#scannerAddProduct'),
+      scannerCheckout: document.querySelector('#scannerCheckout'),
       receiptModal: document.querySelector('#receiptModal'),
       receiptClose: document.querySelector('#receiptClose'),
       receiptPaper: document.querySelector('#receiptPaper'),
@@ -992,6 +1091,12 @@
     }
 
     function renderCart() {
+      const count = cart.reduce((sum, item) => sum + item.qty, 0);
+      const total = cart.reduce((sum, item) => {
+        const product = state.products.find(p => p.id === item.id);
+        return sum + (product ? product.price * item.qty : 0);
+      }, 0);
+
       if (!cart.length) {
         els.cartList.innerHTML = '<div class="empty">Agrega productos desde el inventario.</div>';
       } else {
@@ -1014,14 +1119,35 @@
         }).join('');
       }
 
-      const count = cart.reduce((sum, item) => sum + item.qty, 0);
-      const total = cart.reduce((sum, item) => {
-        const product = state.products.find(p => p.id === item.id);
-        return sum + (product ? product.price * item.qty : 0);
-      }, 0);
       els.itemCount.textContent = count;
       els.cartTotal.textContent = money.format(total);
       els.checkoutBtn.disabled = cart.length === 0;
+      renderScannerSalePanel(count, total);
+    }
+
+    function renderScannerSalePanel(count, total) {
+      els.scannerItemCount.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
+      els.scannerTotal.textContent = money.format(total);
+      els.scannerCheckout.disabled = cart.length === 0 || saving;
+
+      if (!cart.length) {
+        els.scannerCartList.innerHTML = '<div class="empty">Los productos escaneados aparecerán aquí.</div>';
+        return;
+      }
+
+      els.scannerCartList.innerHTML = cart.map(item => {
+        const product = state.products.find(p => p.id === item.id);
+        if (!product) return '';
+        return `
+          <div class="scanner-mini-item">
+            <div>
+              <strong>${escapeHtml(product.name)}</strong>
+              <small>${money.format(product.price)} x ${item.qty}</small>
+            </div>
+            <strong>${money.format(product.price * item.qty)}</strong>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderSummary() {
@@ -1165,9 +1291,41 @@
       printWindow.print();
     }
 
+    async function registerCurrentSale() {
+      if (saving) return;
+      if (!cart.length) return;
+      const items = cart.map(item => {
+        const product = state.products.find(p => p.id === item.id);
+        return { id: item.id, name: product.name, qty: item.qty, price: product.price };
+      });
+      const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+      for (const item of cart) {
+        const product = state.products.find(p => p.id === item.id);
+        product.stock -= item.qty;
+      }
+      const sale = { id: makeId(), date: new Date().toISOString(), items, total };
+      state.sales.unshift(sale);
+      cart = [];
+      if (await render()) {
+        closeScanner();
+        showReceipt(sale);
+      }
+    }
+
     function setScannerResult(message, isError = false) {
       els.scannerResult.textContent = message;
       els.scannerResult.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+    }
+
+    function showScannerAddOption(code) {
+      els.barcode.value = code;
+      els.scannerAddProduct.hidden = false;
+      els.scannerAddProduct.textContent = `Agregar producto ${code}`;
+    }
+
+    function hideScannerAddOption() {
+      els.scannerAddProduct.hidden = true;
+      els.scannerAddProduct.textContent = 'Agregar producto';
     }
 
     function stopScannerCamera() {
@@ -1189,9 +1347,13 @@
     function handleScannedBarcode(rawCode) {
       const code = normalizeBarcode(rawCode);
       if (!code) return;
-      stopScannerCamera();
+      const now = Date.now();
+      if (code === scannerLastCode && now - scannerLastAt < 1800) return;
+      scannerLastCode = code;
+      scannerLastAt = now;
 
       if (scannerMode === 'register') {
+        stopScannerCamera();
         els.barcode.value = code;
         setScannerResult(`Código detectado: ${code}. Completa nombre, precio y stock para registrar el producto.`);
         els.name.focus();
@@ -1200,12 +1362,12 @@
 
       const product = findProductByBarcode(code);
       if (!product) {
-        els.barcode.value = code;
-        setScannerResult(`Código ${code} no está registrado. Lo dejé en el formulario para que agregues el producto.`, true);
-        els.name.focus();
+        showScannerAddOption(code);
+        setScannerResult(`Código ${code} no está registrado. Puedes agregarlo al inventario.`, true);
         return;
       }
 
+      hideScannerAddOption();
       if (product.stock <= 0) {
         setScannerResult(`${product.name}: ${money.format(product.price)}. No se agregó porque no tiene stock.`, true);
         return;
@@ -1215,7 +1377,7 @@
       showingEmptyStock = false;
       addToCart(product.id);
       renderProducts();
-      setScannerResult(`${product.name}: ${money.format(product.price)}. Agregado a la venta.`);
+      setScannerResult(`${product.name}: ${money.format(product.price)}. Agregado a la venta. Sigue escaneando.`);
     }
 
     async function scanLoop() {
@@ -1234,6 +1396,9 @@
       scannerMode = mode;
       stopScannerCamera();
       els.scannerTitle.textContent = mode === 'register' ? 'Escanear para registrar' : 'Escanear producto';
+      els.scannerSalePanel.style.display = mode === 'sale' ? 'grid' : 'none';
+      hideScannerAddOption();
+      renderCart();
       els.scannerModal.classList.add('open');
       els.scannerModal.setAttribute('aria-hidden', 'false');
       setScannerResult('Preparando cámara...');
@@ -1261,6 +1426,8 @@
         await els.scannerVideo.play();
         scannerActive = true;
         setScannerResult('Apunta al código de barras. Cuando lo detecte, mostrará el precio.');
+        scannerLastCode = '';
+        scannerLastAt = 0;
         scanLoop();
       } catch {
         setScannerResult('No se pudo abrir la cámara. Revisa el permiso de cámara o escribe el código manualmente.', true);
@@ -1290,21 +1457,7 @@
     });
 
     els.checkoutBtn.addEventListener('click', async () => {
-      if (saving) return;
-      if (!cart.length) return;
-      const items = cart.map(item => {
-        const product = state.products.find(p => p.id === item.id);
-        return { id: item.id, name: product.name, qty: item.qty, price: product.price };
-      });
-      const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-      for (const item of cart) {
-        const product = state.products.find(p => p.id === item.id);
-        product.stock -= item.qty;
-      }
-      const sale = { id: makeId(), date: new Date().toISOString(), items, total };
-      state.sales.unshift(sale);
-      cart = [];
-      if (await render()) showReceipt(sale);
+      registerCurrentSale();
     });
 
     els.clearCartBtn.addEventListener('click', () => {
@@ -1341,6 +1494,12 @@
 
     els.scanRegisterBtn.addEventListener('click', () => openScanner('register'));
     els.scanSaleBtn.addEventListener('click', () => openScanner('sale'));
+    els.scannerAddProduct.addEventListener('click', () => {
+      closeScanner();
+      els.name.focus();
+      els.productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    els.scannerCheckout.addEventListener('click', registerCurrentSale);
     els.scannerClose.addEventListener('click', closeScanner);
     els.scannerRetry.addEventListener('click', () => openScanner(scannerMode));
     els.scannerModal.addEventListener('click', event => {
