@@ -545,6 +545,10 @@
       grid-column: 1 / -1;
     }
 
+    .scanner-torch {
+      width: 100%;
+    }
+
     .receipt-modal {
       position: fixed;
       inset: 0;
@@ -834,6 +838,7 @@
       <div class="scanner-body">
         <video class="scanner-video" id="scannerVideo" muted playsinline></video>
         <div class="scanner-result" id="scannerResult">Preparando cámara...</div>
+        <button class="secondary scanner-torch" id="scannerTorch" type="button" hidden>Encender flash</button>
         <div class="scanner-sale-panel" id="scannerSalePanel">
           <div class="scanner-total">
             <div>
@@ -903,6 +908,7 @@
     let scannerFrame = 0;
     let scannerLastCode = '';
     let scannerLastAt = 0;
+    let scannerTorchOn = false;
 
     const els = {
       today: document.querySelector('#today'),
@@ -934,6 +940,7 @@
       scannerTitle: document.querySelector('#scannerTitle'),
       scannerVideo: document.querySelector('#scannerVideo'),
       scannerResult: document.querySelector('#scannerResult'),
+      scannerTorch: document.querySelector('#scannerTorch'),
       scannerRetry: document.querySelector('#scannerRetry'),
       scannerSalePanel: document.querySelector('#scannerSalePanel'),
       scannerCartList: document.querySelector('#scannerCartList'),
@@ -1328,6 +1335,28 @@
       els.scannerAddProduct.textContent = 'Agregar producto';
     }
 
+    function setupScannerTorch() {
+      const track = scannerStream?.getVideoTracks()[0];
+      const supportsTorch = Boolean(track?.getCapabilities?.().torch);
+      scannerTorchOn = false;
+      els.scannerTorch.hidden = !supportsTorch;
+      els.scannerTorch.textContent = 'Encender flash';
+    }
+
+    async function toggleScannerTorch() {
+      const track = scannerStream?.getVideoTracks()[0];
+      if (!track?.applyConstraints) return;
+      try {
+        scannerTorchOn = !scannerTorchOn;
+        await track.applyConstraints({ advanced: [{ torch: scannerTorchOn }] });
+        els.scannerTorch.textContent = scannerTorchOn ? 'Apagar flash' : 'Encender flash';
+      } catch {
+        scannerTorchOn = false;
+        els.scannerTorch.hidden = true;
+        setScannerResult('Esta cámara no permite controlar el flash desde el navegador.', true);
+      }
+    }
+
     function stopScannerCamera() {
       scannerActive = false;
       cancelAnimationFrame(scannerFrame);
@@ -1336,6 +1365,9 @@
       }
       scannerStream = null;
       els.scannerVideo.srcObject = null;
+      scannerTorchOn = false;
+      els.scannerTorch.hidden = true;
+      els.scannerTorch.textContent = 'Encender flash';
     }
 
     function closeScanner() {
@@ -1424,6 +1456,7 @@
         });
         els.scannerVideo.srcObject = scannerStream;
         await els.scannerVideo.play();
+        setupScannerTorch();
         scannerActive = true;
         setScannerResult('Apunta al código de barras. Cuando lo detecte, mostrará el precio.');
         scannerLastCode = '';
@@ -1501,6 +1534,7 @@
     });
     els.scannerCheckout.addEventListener('click', registerCurrentSale);
     els.scannerClose.addEventListener('click', closeScanner);
+    els.scannerTorch.addEventListener('click', toggleScannerTorch);
     els.scannerRetry.addEventListener('click', () => openScanner(scannerMode));
     els.scannerModal.addEventListener('click', event => {
       if (event.target === els.scannerModal) closeScanner();
