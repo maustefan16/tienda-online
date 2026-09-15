@@ -870,11 +870,19 @@
       return state.products.find(product => normalizeBarcode(product.barcode) === target) || null;
     }
 
+    let sharedRevision = '';
+    let savedSnapshot = '';
+    let saving = false;
     async function loadState() {
       if (usesSharedDatabase) {
         try {
           const response = await fetch('/api/state', { cache: 'no-store' });
-          if (response.ok) return normalizeState(await response.json());
+          if (response.ok) {
+            sharedRevision = response.headers.get('x-store-revision') || '';
+            const loaded = normalizeState(await response.json());
+            localStorage.setItem(storeKey, JSON.stringify(loaded));
+            return loaded;
+          }
         } catch {}
       }
       const saved = localStorage.getItem(storeKey);
@@ -887,27 +895,60 @@
     }
 
     async function saveState() {
-      localStorage.setItem(storeKey, JSON.stringify(state));
+      const snapshot = JSON.stringify(state);
+      if (snapshot === savedSnapshot) return true;
+      if (saving) return false;
+      saving = true;
       if (usesSharedDatabase) {
         try {
+          if (!sharedRevision && !['localhost', '127.0.0.1'].includes(location.hostname)) throw new Error('Sin conexion con la base de datos. Conectate a internet e intenta nuevamente.');
           const response = await fetch('/api/state', {
             method: 'PUT',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify(state)
+            headers: { 'content-type': 'application/json', 'if-match': sharedRevision },
+            body: snapshot
           });
-          if (!response.ok) throw new Error('Database unavailable');
-        } catch {}
-        return;
+          if (!response.ok) throw new Error(response.status === 409 ? 'Otro celular modifico la tienda. Tu cambio no se guardo; intenta nuevamente.' : 'No se pudo guardar. Revisa tu conexion e intenta nuevamente.');
+          sharedRevision = response.headers.get('x-store-revision') || sharedRevision;
+        } catch (error) {
+          state = normalizeState(JSON.parse(savedSnapshot));
+          saving = false;
+          alert(error.message);
+          await refreshSharedState();
+          render();
+          return false;
+        }
       }
+      localStorage.setItem(storeKey, snapshot);
+      savedSnapshot = snapshot;
+      saving = false;
+      return true;
     }
 
-    function render() {
+    async function render() {
+      const saved = await saveState();
       els.today.textContent = dateFmt.format(new Date());
       renderCategories();
       renderProducts();
       renderCart();
       renderSummary();
-      saveState();
+      return saved;
+    }
+
+    async function refreshSharedState() {
+      if (!usesSharedDatabase || saving || document.hidden) return;
+      const previousSnapshot = savedSnapshot;
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) return;
+        const loaded = normalizeState(await response.json());
+        if (saving || savedSnapshot !== previousSnapshot || JSON.stringify(state) !== savedSnapshot) return;
+        sharedRevision = response.headers.get('x-store-revision') || '';
+        state = loaded;
+        savedSnapshot = JSON.stringify(state);
+        localStorage.setItem(storeKey, savedSnapshot);
+        cart = cart.filter(item => state.products.some(p => p.id === item.id && p.stock >= item.qty));
+        render();
+      } catch {}
     }
 
     function renderCategories() {
@@ -1024,6 +1065,7 @@
     }
 
     function deleteProduct(id) {
+      if (saving) return;
       const product = state.products.find(p => p.id === id);
       if (!product) return;
       if (!confirm(`¿Borrar "${product.name}" del inventario?`)) return;
@@ -1227,6 +1269,7 @@
 
     els.productForm.addEventListener('submit', event => {
       event.preventDefault();
+      if (saving) return;
       const barcode = normalizeBarcode(els.barcode.value);
       if (barcode && state.products.some(product => normalizeBarcode(product.barcode) === barcode)) {
         alert('Ese código de barras ya está registrado en otro producto.');
@@ -1246,7 +1289,8 @@
       render();
     });
 
-    els.checkoutBtn.addEventListener('click', () => {
+    els.checkoutBtn.addEventListener('click', async () => {
+      if (saving) return;
       if (!cart.length) return;
       const items = cart.map(item => {
         const product = state.products.find(p => p.id === item.id);
@@ -1260,8 +1304,7 @@
       const sale = { id: makeId(), date: new Date().toISOString(), items, total };
       state.sales.unshift(sale);
       cart = [];
-      render();
-      showReceipt(sale);
+      if (await render()) showReceipt(sale);
     });
 
     els.clearCartBtn.addEventListener('click', () => {
@@ -1289,6 +1332,7 @@
     });
 
     els.resetBtn.addEventListener('click', () => {
+      if (saving) return;
       if (!confirm('¿Reiniciar productos y ventas?')) return;
       state = normalizeState({ products: starterProducts.map(p => ({ ...p, id: makeId() })), sales: [] });
       cart = [];
@@ -1323,7 +1367,11 @@
         navigator.serviceWorker.register('/service-worker.js').catch(() => {});
       }
       state = await loadState();
+      savedSnapshot = JSON.stringify(state);
       render();
+      setInterval(refreshSharedState, 5000);
+      window.addEventListener('focus', refreshSharedState);
+      window.addEventListener('online', refreshSharedState);
     }
 
     init();

@@ -52,21 +52,26 @@ module.exports = async function handler(req, res) {
     await initDb();
 
     if (req.method === 'GET') {
-      const result = await getPool().query('select data from app_state where id = $1', ['tienda']);
+      const result = await getPool().query('select data, md5(data::text) as revision from app_state where id = $1', ['tienda']);
       res.setHeader('cache-control', 'no-store');
+      res.setHeader('x-store-revision', result.rows[0].revision);
       res.status(200).json(result.rows[0]?.data || starterState);
       return;
     }
 
     if (req.method === 'PUT') {
-      await getPool().query(
-        `insert into app_state (id, data, updated_at)
-         values ($1, $2::jsonb, now())
-         on conflict (id)
-         do update set data = excluded.data, updated_at = now()`,
-        ['tienda', JSON.stringify(req.body)]
+      if (!Array.isArray(req.body?.products) || !Array.isArray(req.body?.sales)) {
+        return res.status(400).json({ error: 'Invalid store data' });
+      }
+      const result = await getPool().query(
+        `update app_state set data = $2::jsonb, updated_at = now()
+         where id = $1 and md5(data::text) = $3
+         returning md5(data::text) as revision`,
+        ['tienda', JSON.stringify(req.body), req.headers['if-match'] || '']
       );
+      if (!result.rowCount) return res.status(409).json({ error: 'La tienda cambio en otro dispositivo. Actualiza e intenta nuevamente.' });
       res.setHeader('cache-control', 'no-store');
+      res.setHeader('x-store-revision', result.rows[0].revision);
       res.status(200).json({ ok: true });
       return;
     }
