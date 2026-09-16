@@ -707,6 +707,27 @@
         display: none;
       }
     }
+    body { font-size: 18px; }
+    button, input, select { min-height: 54px; font-size: 18px; }
+    main { display: block; max-width: 760px; margin: auto; }
+    header .header-actions, main > aside { display: none; }
+    .simple-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .simple-nav button { white-space: normal; }
+    #scannerModal { position: static; display: block; background: none; padding: 0; }
+    #scannerModal .scanner-card { width: 100%; max-height: none; border: 0; box-shadow: none; }
+    #scannerModal .scanner-video { height: 300px; background: #202420; }
+    #scannerClose, .scanner-head p { display: none; }
+    .scanner-result { font-size: 22px; line-height: 1.4; }
+    .scanner-total strong { font-size: 32px; }
+    .scanner-mini-item { font-size: 20px; }
+    .scanner-mini-item > div { min-width: 0; overflow-wrap: anywhere; }
+    .scanner-mini-item strong:last-child { white-space: nowrap; }
+    #catalogPanel { margin-top: 20px; }
+    #catalogPanel[hidden], #productForm[hidden] { display: none; }
+    #productForm { grid-template-columns: 1fr; }
+    #productForm .form-actions { display: grid; grid-template-columns: 1fr; }
+    #productForm button[type=submit] { width: 100%; }
+    @media (max-width: 620px) { main { padding: 12px; } .scanner-body { padding: 12px; } }
   </style>
 </head>
 <body>
@@ -721,7 +742,11 @@
   </header>
 
   <main>
-    <section class="panel">
+    <nav class="simple-nav" aria-label="Productos">
+      <button id="simpleRegister" type="button">Registrar producto</button>
+      <button id="simpleList" class="secondary" type="button">Lista de productos</button>
+    </nav>
+    <section class="panel" id="catalogPanel" hidden>
       <div class="panel-head">
         <h2>Inventario</h2>
         <div class="actions">
@@ -752,7 +777,7 @@
           </div>
           <div class="form-actions">
             <button class="secondary" id="scanRegisterBtn" type="button">Escanear código</button>
-            <button class="icon-btn" title="Agregar producto" aria-label="Agregar producto">+</button>
+            <button type="submit">Guardar producto</button>
           </div>
         </form>
 
@@ -1323,20 +1348,21 @@
     function closeScanner() {
       stopScannerCamera();
       els.scannerModal.classList.remove('open');
-      els.scannerModal.setAttribute('aria-hidden', 'true');
+      els.scannerModal.setAttribute('aria-hidden', 'false');
     }
 
     function handleScannedBarcode(rawCode) {
       const code = normalizeBarcode(rawCode);
       if (!code) return;
       const now = Date.now();
-      if (code === scannerLastCode && now - scannerLastAt < 650) return;
+      if (code === scannerLastCode) return;
       scannerLastCode = code;
       scannerLastAt = now;
 
       if (scannerMode === 'register') {
         stopScannerCamera();
         els.barcode.value = code;
+        showProductForm();
         setScannerResult(`Código detectado: ${code}. Completa nombre, precio y stock para registrar el producto.`);
         els.name.focus();
         return;
@@ -1368,6 +1394,8 @@
         const codes = await scannerDetector.detect(els.scannerVideo);
         if (codes.length) {
           handleScannedBarcode(codes[0].rawValue);
+        } else if (Date.now() - scannerLastAt > 900) {
+          scannerLastCode = '';
         }
       } catch {}
       scannerFrame = requestAnimationFrame(scanLoop);
@@ -1376,7 +1404,6 @@
     async function openScanner(mode) {
       scannerMode = mode;
       stopScannerCamera();
-      if (mode === 'sale') cart = [];
       els.scannerTitle.textContent = mode === 'register' ? 'Escanear para registrar' : 'Escanear producto';
       els.scannerSalePanel.style.display = mode === 'sale' ? 'grid' : 'none';
       hideScannerAddOption();
@@ -1417,7 +1444,7 @@
       }
     }
 
-    els.productForm.addEventListener('submit', event => {
+    els.productForm.addEventListener('submit', async event => {
       event.preventDefault();
       if (saving) return;
       const barcode = normalizeBarcode(els.barcode.value);
@@ -1436,7 +1463,11 @@
       if (!product.name || product.price < 0 || product.stock < 0) return;
       state.products.push(product);
       els.productForm.reset();
-      render();
+      if (await render()) {
+        document.querySelector('#catalogPanel').hidden = true;
+        await openScanner('sale');
+        setScannerResult(`${product.name}: ${money.format(product.price)}. Producto guardado.`);
+      }
     });
 
     els.checkoutBtn.addEventListener('click', async () => {
@@ -1479,6 +1510,7 @@
     els.scanSaleBtn.addEventListener('click', () => openScanner('sale'));
     els.scannerAddProduct.addEventListener('click', () => {
       closeScanner();
+      showProductForm();
       els.name.focus();
       els.productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -1505,13 +1537,38 @@
         .replaceAll("'", '&#039;');
     }
 
+    function showProductForm() {
+      document.querySelector('#catalogPanel').hidden = false;
+      els.productForm.hidden = false;
+      els.productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      els.name.focus();
+    }
+
+    document.querySelector('#simpleRegister').addEventListener('click', () => {
+      document.querySelector('#catalogPanel').hidden = false;
+      els.productForm.hidden = false;
+      openScanner('register');
+    });
+    document.querySelector('#simpleList').addEventListener('click', () => {
+      const panel = document.querySelector('#catalogPanel');
+      panel.hidden = !panel.hidden;
+      els.productForm.hidden = true;
+      if (!panel.hidden) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
     async function init() {
+      document.querySelector('main').insertBefore(els.scannerModal, document.querySelector('#catalogPanel'));
+      els.scannerResult.after(els.scannerRetry);
+      els.scannerModal.removeAttribute('aria-hidden');
+      els.scannerModal.querySelector('[role=dialog]').removeAttribute('aria-modal');
+      els.scannerModal.querySelector('[role=dialog]').removeAttribute('role');
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js').catch(() => {});
       }
       state = await loadState();
       savedSnapshot = JSON.stringify(state);
       render();
+      await openScanner('sale');
       setInterval(refreshSharedState, 5000);
       window.addEventListener('focus', refreshSharedState);
       window.addEventListener('online', refreshSharedState);
