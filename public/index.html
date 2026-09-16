@@ -727,6 +727,19 @@
     #productForm { grid-template-columns: 1fr; }
     #productForm .form-actions { display: grid; grid-template-columns: 1fr; }
     #productForm button[type=submit] { width: 100%; }
+    body[data-view=register] #catalogPanel .search-row,
+    body[data-view=register] #catalogPanel .history,
+    body[data-view=register] #exportBtn { display: none; }
+    body[data-view=form] #scannerModal,
+    body[data-view=list] #scannerModal,
+    body[data-view=form] #catalogPanel .search-row,
+    body[data-view=form] #catalogPanel .history,
+    body[data-view=form] #exportBtn { display: none; }
+    #cameraBack { width: 100%; margin-bottom: 12px; }
+    #productForm label { font-size: 20px; color: #172026; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #087c64; outline-offset: 3px; }
+    .scanner-quantity { display: flex; align-items: center; gap: 12px; grid-column: 1 / -1; }
+    .scanner-quantity button { min-width: 54px; }
     @media (max-width: 620px) { main { padding: 12px; } .scanner-body { padding: 12px; } }
   </style>
 </head>
@@ -746,9 +759,10 @@
       <button id="simpleRegister" type="button">Registrar producto</button>
       <button id="simpleList" class="secondary" type="button">Lista de productos</button>
     </nav>
+    <button id="cameraBack" class="secondary" type="button" hidden>Volver a la cámara</button>
     <section class="panel" id="catalogPanel" hidden>
       <div class="panel-head">
-        <h2>Inventario</h2>
+          <h2 id="catalogTitle">Lista de productos</h2>
         <div class="actions">
           <button class="secondary" id="exportBtn">Exportar CSV</button>
         </div>
@@ -759,7 +773,7 @@
             <label for="name">Producto</label>
             <input id="name" required placeholder="Ej. Arroz 1 kg">
           </div>
-          <div>
+          <div hidden>
             <label for="category">Categoría</label>
             <input id="category" placeholder="Abarrotes">
           </div>
@@ -768,7 +782,7 @@
             <input id="price" required type="number" min="0" step="0.10" placeholder="0.00">
           </div>
           <div>
-            <label for="stock">Stock</label>
+            <label for="stock">¿Cuántas unidades tienes?</label>
             <input id="stock" required type="number" min="0" step="1" placeholder="0">
           </div>
           <div class="wide">
@@ -837,7 +851,7 @@
       </div>
       <div class="scanner-body">
         <video class="scanner-video" id="scannerVideo" muted playsinline></video>
-        <div class="scanner-result" id="scannerResult">Preparando cámara...</div>
+        <div class="scanner-result" id="scannerResult" role="status" aria-live="polite">Preparando cámara...</div>
         <button class="secondary scanner-torch" id="scannerTorch" type="button" hidden>Encender flash</button>
         <div class="scanner-sale-panel" id="scannerSalePanel">
           <div class="scanner-total">
@@ -1147,6 +1161,11 @@
               <small>${money.format(product.price)} x ${item.qty}</small>
             </div>
             <strong>${money.format(product.price * item.qty)}</strong>
+            <div class="scanner-quantity">
+              <button class="secondary" onclick="changeQty('${item.id}', -1)" aria-label="Quitar una unidad de ${escapeHtml(product.name)}">−</button>
+              <span>${item.qty} unidades</span>
+              <button class="secondary" onclick="changeQty('${item.id}', 1)" aria-label="Agregar una unidad de ${escapeHtml(product.name)}">+</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -1381,6 +1400,11 @@
         return;
       }
 
+      if ((cart.find(item => item.id === product.id)?.qty || 0) >= product.stock) {
+        setScannerResult(`${product.name}: ya agregaste todas las unidades disponibles.`, true);
+        return;
+      }
+
       els.search.value = product.name;
       showingEmptyStock = false;
       addToCart(product.id);
@@ -1402,6 +1426,9 @@
     }
 
     async function openScanner(mode) {
+      document.body.dataset.view = mode === 'sale' ? 'camera' : 'register';
+      document.querySelector('#cameraBack').hidden = mode === 'sale';
+      if (mode === 'sale') document.querySelector('#catalogPanel').hidden = true;
       scannerMode = mode;
       stopScannerCamera();
       els.scannerTitle.textContent = mode === 'register' ? 'Escanear para registrar' : 'Escanear producto';
@@ -1538,6 +1565,9 @@
     }
 
     function showProductForm() {
+      document.body.dataset.view = 'form';
+      document.querySelector('#catalogTitle').textContent = 'Registrar producto';
+      document.querySelector('#cameraBack').hidden = false;
       document.querySelector('#catalogPanel').hidden = false;
       els.productForm.hidden = false;
       els.productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1545,16 +1575,23 @@
     }
 
     document.querySelector('#simpleRegister').addEventListener('click', () => {
+      document.querySelector('#catalogTitle').textContent = 'Registrar producto';
       document.querySelector('#catalogPanel').hidden = false;
       els.productForm.hidden = false;
       openScanner('register');
     });
     document.querySelector('#simpleList').addEventListener('click', () => {
+      stopScannerCamera();
+      document.body.dataset.view = 'list';
+      document.querySelector('#catalogTitle').textContent = 'Lista de productos';
+      document.querySelector('#cameraBack').hidden = false;
       const panel = document.querySelector('#catalogPanel');
-      panel.hidden = !panel.hidden;
+      panel.hidden = false;
       els.productForm.hidden = true;
       if (!panel.hidden) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+
+    document.querySelector('#cameraBack').addEventListener('click', () => openScanner('sale'));
 
     async function init() {
       document.querySelector('main').insertBefore(els.scannerModal, document.querySelector('#catalogPanel'));
