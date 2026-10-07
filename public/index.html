@@ -741,6 +741,43 @@
     .scanner-quantity { display: flex; align-items: center; gap: 12px; grid-column: 1 / -1; }
     .scanner-quantity button { min-width: 54px; }
     @media (max-width: 620px) { main { padding: 12px; } .scanner-body { padding: 12px; } }
+    /* Keep the sale visible beside the camera on larger screens. */
+    body { background: #f3f7f7; font-size: 16px; }
+    header { padding: 22px max(20px, calc((100vw - 1120px) / 2)); box-shadow: none; }
+    h1 { font-size: 28px; letter-spacing: -.5px; }
+    main { max-width: 1160px; padding: 24px 20px; }
+    button, input, select { font-size: 16px; min-height: 48px; }
+    button { box-shadow: none; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .simple-nav { max-width: 580px; }
+    #scannerModal .scanner-card { border: 1px solid var(--line); border-radius: 18px; background: white; }
+    .scanner-head { padding: 18px 22px; background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); }
+    .scanner-head h2 { font-size: 20px; }
+    .scanner-body { padding: 20px; gap: 12px; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); overflow: visible; }
+    .scanner-body > :not(.scanner-sale-panel) { grid-column: 1; }
+    #scannerModal .scanner-video { height: 230px; border-radius: 12px; background: #142e32; }
+    .scanner-result { font-size: 15px; min-height: 0; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+    .scanner-sale-panel { grid-column: 2; grid-row: 1 / span 6; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: #f8fbfa; align-content: start; }
+    .scanner-total strong { font-size: 36px; }
+    .scanner-mini-list { min-height: 140px; max-height: 300px; }
+    .scanner-mini-item { font-size: 16px; background: white; }
+    .scanner-quantity { gap: 10px; }
+    .scanner-quantity button { min-width: 44px; min-height: 44px; }
+    .manual-code { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    .manual-code label { grid-column: 1 / -1; font-size: 13px; text-transform: none; margin: 0; }
+    #productForm label { font-size: 15px; }
+    .panel { box-shadow: 0 6px 24px rgba(15, 34, 45, .05); }
+    @media (max-width: 760px) {
+      main { padding: 16px 12px; }
+      .scanner-body { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+      .scanner-sale-panel { grid-column: 1; grid-row: auto; padding: 16px; }
+      #scannerModal .scanner-video { height: 180px; }
+      .scanner-head { padding: 16px; }
+      .simple-nav { max-width: none; gap: 8px; }
+      .scanner-total strong { font-size: 30px; }
+      .manual-code { grid-template-columns: minmax(0, 1fr); }
+      .manual-code label { grid-column: 1; }
+    }
   </style>
 </head>
 <body>
@@ -852,6 +889,11 @@
       <div class="scanner-body">
         <video class="scanner-video" id="scannerVideo" muted playsinline></video>
         <div class="scanner-result" id="scannerResult" role="status" aria-live="polite">Preparando cámara...</div>
+        <form class="manual-code" id="manualCodeForm">
+          <label for="manualCode">Ingresar código de barras manualmente</label>
+          <input id="manualCode" name="barcode" type="text" placeholder="Escribe o pega el código" autocomplete="off" required>
+          <button type="submit">Usar código</button>
+        </form>
         <button class="secondary scanner-torch" id="scannerTorch" type="button" hidden>Encender flash</button>
         <div class="scanner-sale-panel" id="scannerSalePanel">
           <div class="scanner-total">
@@ -1142,7 +1184,7 @@
     }
 
     function renderScannerSalePanel(count, total) {
-      els.scannerItemCount.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
+      els.scannerItemCount.textContent = `${count} ${count === 1 ? 'artículo' : 'artículos'}`;
       els.scannerTotal.textContent = money.format(total);
       els.scannerCheckout.disabled = cart.length === 0 || saving;
 
@@ -1541,6 +1583,18 @@
       els.name.focus();
       els.productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+    document.querySelector('#manualCodeForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const input = document.querySelector('#manualCode');
+      if (!normalizeBarcode(input.value)) {
+        setScannerResult('Escribe un código de barras válido.', true);
+        input.focus();
+        return;
+      }
+      scannerLastCode = '';
+      handleScannedBarcode(input.value);
+      input.value = '';
+    });
     els.scannerCheckout.addEventListener('click', registerCurrentSale);
     els.scannerClose.addEventListener('click', closeScanner);
     els.scannerTorch.addEventListener('click', toggleScannerTorch);
@@ -1615,3 +1669,4 @@
   </script>
 </body>
 </html>
+
