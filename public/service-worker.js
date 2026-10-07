@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tienda-pwa-v3';
+const CACHE_NAME = 'tienda-pwa-v4';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -41,3 +41,4 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
+
